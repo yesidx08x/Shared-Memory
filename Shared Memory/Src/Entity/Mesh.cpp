@@ -29,7 +29,15 @@ Mesh::Mesh()
 	_jobData.push_back(_data.back());
 }
 
-Mesh::~Mesh(){}
+Mesh::~Mesh()
+{
+	for (size_t i = 0; i < _data.size(); i++)
+	{
+		_data[i].smallVertexData == nullptr ? 0 : delete _data[i].smallVertexData;
+		_data[i].vertexData == nullptr ? 0 : delete _data[i].vertexData;
+		_data[i].position == nullptr ? 0 : delete _data[i].position;
+	}
+}
 
 void Mesh::BindMesh(Entity& entity, string name, bool render, GRFVersion version)
 {

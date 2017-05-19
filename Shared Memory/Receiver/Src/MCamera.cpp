@@ -7,7 +7,10 @@ MCamera::MCamera()
 	XMStoreFloat4x4(&_data->buffers.view, XMMatrixTranspose(XMMatrixLookAtLH(XMVectorSet(0, 0, -5, 1), XMVectorSet(0, 0, 0, 1), XMVectorSet(0, 1, 0, 0))));
 }
 
-MCamera::~MCamera(){}
+MCamera::~MCamera()
+{
+	delete _data;
+}
 
 CameraData* MCamera::GetData(){return _data;}
 

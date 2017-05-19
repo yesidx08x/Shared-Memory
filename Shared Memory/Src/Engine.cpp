@@ -134,9 +134,6 @@ Engine::Engine(HINSTANCE hInstance)
 	_shaderHandler = new ShaderHandler(_device, _devcon);
 	_bufferHandler = new BufferHandler(_device, _devcon);
 	_materialHandler = new MaterialHandler(_device, _devcon);
-	
-
-
 	_timer = new TimerClass(60);
 
 	HRESULT hr;
@@ -170,6 +167,11 @@ Engine::~Engine()
 	delete _shaderHandler;
 	delete _bufferHandler;
 	delete _materialHandler;
+	delete _timer;
+	for (size_t i = 0; i < _scenes.size(); i++)
+	{
+		delete _scenes[i];
+	}
 }
 
 void Engine::Run(Scene * scene)
@@ -380,7 +382,7 @@ void Engine::ShowFPS()
 {
 	ostringstream outs;
 	outs.precision(6);
-	outs << L"3D Viewer" << L"    " << L"FPS:  " << _timer->fps() << L"    " << L"Frame Time: " << _timer->frameDeltaTime() << L"  (ms)";
+	outs << "3D Viewer" << "    " << "FPS:  " << _timer->fps() << "    " << "Frame Time: " << _timer->frameDeltaTime() << "  (ms)";
 	SetWindowText(_window, outs.str().c_str());
 }
 

@@ -12,9 +12,6 @@ FBXConverter::~FBXConverter()
 {
 	// Destroy the SDK manager and all the other objects it was handling.
 	_manager->Destroy();
-	_ioSettings->Destroy();
-	_importer->Destroy();
-	_scene->Destroy();
 }
 
 void FBXConverter::ConvertFile(string name, GRFVersion version)

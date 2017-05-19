@@ -1,7 +1,14 @@
+#define _DEBUG 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
 #include "Viewer.h"
+#include <vld.h>
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
+#ifdef _DEBUG
+	//_CrtSetBreakAlloc(206);
 	// Opens debug window
 	if (AllocConsole())
 	{
@@ -11,6 +18,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		HWND winHandle = FindWindow(NULL, "Debug Console");
 		MoveWindow(winHandle, ScreenWidth, 0, ScreenWidth, ScreenHeight, true);
 	}
+#endif
+
 	Viewer viewer(hInstance, nCmdShow);
-	return viewer.Run();
+	int result = viewer.Run();
+	//struct AtExit
+	//{
+	//	~AtExit() { _CrtDumpMemoryLeaks(); }
+	//} doAtExit;
+	return result;
 }

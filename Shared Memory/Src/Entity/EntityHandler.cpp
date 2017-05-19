@@ -19,11 +19,16 @@ EntityHandler::~EntityHandler()
 	delete _material;
 	delete _camera;
 	delete _light;
+
+	for (pair<string, Entity*> entity : _entities)
+	{
+		delete entity.second;
+	}
 }
 
 Entity* EntityHandler::CreateEntity(string identifier, bool transform)
 {
-	Entity* entity = new Entity;
+	Entity* entity = new Entity();
 	_entities.insert(pair<string, Entity*>(identifier, entity));
 	entity->idNumber = (int)_entities.size() - 1;
 	entity->identifier = identifier;

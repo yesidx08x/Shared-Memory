@@ -10,7 +10,20 @@ ShaderHandler::ShaderHandler(ID3D11Device* device, ID3D11DeviceContext* devcon)
 	_directory.append(L"Shaders/");
 }
 
-ShaderHandler::~ShaderHandler(){}
+ShaderHandler::~ShaderHandler()
+{
+	for (size_t i = 0; i < _shaders.size(); i++)
+	{
+		_shaders[i].computeShader == nullptr ? 0 : _shaders[i].computeShader->Release();
+		_shaders[i].domainShader == nullptr ? 0 : _shaders[i].domainShader->Release();
+		_shaders[i].geometryShader == nullptr ? 0 : _shaders[i].geometryShader->Release();
+		_shaders[i].hullshader == nullptr ? 0 : _shaders[i].hullshader->Release();
+		_shaders[i].inputLayout == nullptr ? 0 : _shaders[i].inputLayout->Release();
+		_shaders[i].pixelshader == nullptr ? 0 : _shaders[i].pixelshader->Release();
+		_shaders[i].vertexShader == nullptr ? 0 : _shaders[i].vertexShader->Release();
+	}
+	_shaders.clear();
+}
 
 void ShaderHandler::LoadShaders(ShaderData data)
 {

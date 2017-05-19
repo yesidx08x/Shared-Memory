@@ -5,15 +5,17 @@ Viewer::Viewer(){}
 Viewer::Viewer(HINSTANCE hInstance, int nCmdShow)
 {
 	_engine = new Engine(hInstance);
-	_wndHandle = _engine->GetWindow();
-	_nCmdShow = nCmdShow;
 	_fbxConverter = new FBXConverter("../FBX/", "../Exported GRF/");
 	_dataHandler = new MDataHandler();
+	_wndHandle = _engine->GetWindow();
+	_nCmdShow = nCmdShow;
 }
 
 Viewer::~Viewer()
 {
 	delete _engine;
+	delete _fbxConverter;
+	delete _dataHandler;
 }
 
 int Viewer::Run()

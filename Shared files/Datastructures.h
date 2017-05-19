@@ -22,18 +22,22 @@ const unsigned int LighBufferSize = 20;
 
 inline void PrintError(string text)
 {
+#ifdef _DEBUG
 	HANDLE winHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(winHandle, 12);
 	cout << text << "\n";
 	SetConsoleTextAttribute(winHandle, 15);
+#endif
 }
 
 inline void PrintSuccess(string text)
 {
+#ifdef _DEBUG
 	HANDLE winHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(winHandle, 10);
 	cout << text << "\n";
 	SetConsoleTextAttribute(winHandle, 15);
+#endif
 }
 
 // Enumerations
@@ -119,9 +123,9 @@ struct SmallVertexData
 
 struct MeshData
 {
-	VertexData* vertexData;
-	SmallVertexData* smallVertexData;
-	XMFLOAT4* position;
+	VertexData* vertexData = nullptr;
+	SmallVertexData* smallVertexData = nullptr;
+	XMFLOAT4* position = nullptr;
 
 	GRFVersion version;
 	unsigned int nrOfUsers = 0;
