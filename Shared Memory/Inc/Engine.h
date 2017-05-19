@@ -3,7 +3,6 @@
 #include "ShaderHandler.h"
 #include "MaterialHandler.h"
 #include "GUI.h"
-#include "../DirectXTex/DirectXTexP.h"
 #include <Wincodec.h>
 #include "TimerClass.h"
 #include <sstream>
@@ -82,6 +81,5 @@ public:
 	HWND GetWindow();
 	XMFLOAT2 GetWinDim();
 	void CreateGrid(unsigned int size = 10, float spacing = 50.f, XMFLOAT3 origo = XMFLOAT3(0.0f, 0.0f, 0.0f));
-	void SaveImage(string filename, ID3D11Texture2D* texture);
 	GUI* GetGuiHandler();
 };

@@ -376,15 +376,6 @@ void Engine::SetActiveCameraInfo(CameraData * data){_devcon->PSSetConstantBuffer
 
 void Engine::SetPBRChoice(){_devcon->PSSetConstantBuffers(3, 1, _bufferHandler->GetPBRChoice());}
 
-void Engine::SaveImage(string filename, ID3D11Texture2D * texture)
-{
-	string cat = "SavedImages/" + filename + ".png";
-	ScratchImage image;
-	CaptureTexture(_device, _devcon, texture, image);
-	const Image* img = image.GetImage(0, 0, 0);
-	SaveToWICFile(*img, WIC_FLAGS_NONE, GUID_ContainerFormatPng, wstring(cat.begin(), cat.end()).c_str());
-}
-
 void Engine::ShowFPS()
 {
 	ostringstream outs;
