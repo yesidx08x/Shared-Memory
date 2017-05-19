@@ -9,7 +9,7 @@ Scene::Scene()
 
 	_skybox = _entityHandler->CreateEntity("Skybox");
 	_entityHandler->GetShader()->BindShaders(*_skybox, "Cubemap", true, false, false, false, true);
-	_entityHandler->GetMesh()->BindMesh(*_skybox, "InverseSphere.grf");
+	_entityHandler->GetMesh()->BindMesh(*_skybox, "Standards/InverseSphere.grf");
 	_entityHandler->GetMaterial()->BindMaterial(*_skybox, "WellsRadiance.dds", radience);
 	_entityHandler->GetTransform()->SetPosScaleRot(*_skybox, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(500.0f, 500.0f, 500.0f));
 }

@@ -38,9 +38,8 @@
     <ClCompile Include="Src\Entity\Mesh.cpp" />
     <ClCompile Include="Src\Entity\Shader.cpp" />
     <ClCompile Include="Src\Entity\Transform.cpp" />
-    <ClCompile Include="Src\FBXReader.cpp" />
+    <ClCompile Include="Src\FBXConverter.cpp" />
     <ClCompile Include="Src\GUI.cpp" />
-    <ClCompile Include="Src\InputHandler.cpp" />
     <ClCompile Include="Src\Main.cpp" />
     <ClCompile Include="Src\MaterialHandler.cpp" />
     <ClCompile Include="Src\Scene.cpp" />
@@ -60,9 +59,8 @@
     <ClInclude Include="Inc\Entity\Mesh.h" />
     <ClInclude Include="Inc\Entity\Shader.h" />
     <ClInclude Include="Inc\Entity\Transform.h" />
-    <ClInclude Include="Inc\FBXReader.h" />
+    <ClInclude Include="Inc\FBXConverter.h" />
     <ClInclude Include="Inc\GUI.h" />
-    <ClInclude Include="Inc\InputHandler.h" />
     <ClInclude Include="Inc\MaterialHandler.h" />
     <ClInclude Include="Inc\Scene.h" />
     <ClInclude Include="Inc\ShaderHandler.h" />

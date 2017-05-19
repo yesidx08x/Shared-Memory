@@ -1,7 +1,7 @@
 #pragma once
 #include "Engine.h"
 #include <sstream>
-#include "FBXReader.h"
+#include "FBXConverter.h"
 #include "../Receiver/Inc/MDataHandler.h"
 
 class Viewer
@@ -19,7 +19,7 @@ private:
 	int _nCmdShow;
 	DWORD _deltaTime;
 	DWORD _startTime;
-	FBXReader* _fbxReader;
+	FBXConverter* _fbxConverter;
 	EntityHandler* _entityHandler;
 	MDataHandler* _dataHandler;
 
