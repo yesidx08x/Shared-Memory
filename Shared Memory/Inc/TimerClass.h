@@ -4,20 +4,20 @@
 class TimerClass
 {
 private:
-	double secondsPerCount;
-	double currentDeltaTime;
-	double frametime;
-	double frameLockTime;
+	double secondsPerCount = 0.0;
+	double currentDeltaTime = 0.0;
+	double frametime = 0.0;
+	double frameLockTime = 0.0;
 
-	__int64 baseTime;
-	__int64 pausedTime;
-	__int64 previousTime;
-	__int64 stoppedTime;
-	__int64 currentTime;
+	__int64 baseTime = 0;
+	__int64 pausedTime = 0;
+	__int64 previousTime = 0;
+	__int64 stoppedTime = 0;
+	__int64 currentTime = 0;
 
-	bool stopped;
-	bool frameLock;
-	bool frameRun;
+	bool stopped = false;
+	bool frameLock = false;
+	bool frameRun = false;
 
 public:
 	//Initializing the Timer.

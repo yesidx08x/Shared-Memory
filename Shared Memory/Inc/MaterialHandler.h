@@ -33,9 +33,9 @@ public:
 	ID3D11ShaderResourceView** GetMaterial(unsigned int id);
 
 private:
-	ID3D11Device* _device;
-	ID3D11DeviceContext* _devcon;
+	ID3D11Device* _device = nullptr;
+	ID3D11DeviceContext* _devcon = nullptr;
 
 	vector<Material> _materials;
-	wstring _directory;
+	wstring _directory = L"";
 };

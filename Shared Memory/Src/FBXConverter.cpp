@@ -11,7 +11,7 @@ FBXConverter::FBXConverter(string inpath, string exportpath)
 FBXConverter::~FBXConverter()
 {
 	// Destroy the SDK manager and all the other objects it was handling.
-	_manager->Destroy();
+	_manager != nullptr ? _manager->Destroy() : 0;
 }
 
 void FBXConverter::ConvertFile(string name, GRFVersion version)
@@ -136,9 +136,6 @@ void FBXConverter::GetMesh1(FbxMesh* mesh)
 	FbxVector2 uvCoord;
 	FbxVector4 normal;
 	FbxStringList uvSetNames;
-	//FbxGeometryElementNormal* elementNormal;
-	FbxGeometryElementTangent* elementTanget;
-	FbxGeometryElementBinormal* elementBitangent;
 	bool unmapped;
 	mesh->GetUVSetNames(uvSetNames);
 

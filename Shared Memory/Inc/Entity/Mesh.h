@@ -25,7 +25,7 @@ public:
 private:
 	vector<MeshData> _data;
 	vector<MeshData> _jobData;
-	string _path;
+	string _path = "";
 
 	void ReadFile(string name, GRFVersion version);
 };

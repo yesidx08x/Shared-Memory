@@ -22,17 +22,17 @@ char* SharedMemory::OpenMemory(int size, bool sender)
 		// Main data
 		if (_sender)
 		{
-			_fileMapping = CreateFileMapping(
+			_fileMapping = CreateFileMappingW(
 				INVALID_HANDLE_VALUE,
 				NULL,
 				PAGE_READWRITE,
 				(DWORD)0,
 				size,
-				"Global/MainData");
+				L"Global/MainData");
 		}
 		else
 		{
-			_fileMapping = OpenFileMapping(FILE_MAP_ALL_ACCESS, false, "Global/MainData");
+			_fileMapping = OpenFileMappingW(FILE_MAP_ALL_ACCESS, false, L"Global/MainData");
 		}
 		if (GetLastError() == ERROR_ALREADY_EXISTS)
 			return "Data allready exist\n";

@@ -3,11 +3,10 @@
 #include "ShaderHandler.h"
 #include "MaterialHandler.h"
 #include "GUI.h"
-#include <Wincodec.h>
 #include "TimerClass.h"
-#include <sstream>
 #include "Scene.h"
 #include "Entity/EntityHandler.h"
+#include <sstream>
 
 #pragma comment (lib, "winmm.lib")
 
@@ -18,53 +17,54 @@ private:
 	void SetLight(int id);
 	void SetMaterials(EntityMaterials data);
 	void SetTransformBuffer(XMFLOAT4X4 matrix);
-	TimerClass* GetTimer();
-	void Update();
 	void SetActiveCamera(CameraData* data);
 	void SetActiveCameraInfo(CameraData* data);
-	void SetPBRChoice();
 	void ShowFPS();
 	void CreateRasterizers();
 	void SetRasterizer(RastState state);
+	void HandleJobs();
 
-	void RenderGrid();
 	void BeginScene();
 	void EndScene();
-	void Render(unsigned int size);
 
-	EntityHandler* _entityHandler;
+	EntityHandler* _entityHandler = nullptr;
 
 	// Window
-	XMFLOAT2 _winDim;
+	XMFLOAT2 _winDim = XMFLOAT2(0, 0);
 	HWND _window;
 	HRESULT _hr;
 
 	// D3D
-	IDXGISwapChain* _swapChain;
-	ID3D11Device* _device;
-	ID3D11DeviceContext* _devcon;
-	ID3D11Texture2D* _backBufferTexture;
-	ID3D11RenderTargetView* _backbuffer;
-	ID3D11DepthStencilView* _depthStencilView;
+	IDXGISwapChain* _swapChain = nullptr;
+	ID3D11Device* _device = nullptr;
+	ID3D11DeviceContext* _devcon = nullptr;
+	ID3D11Texture2D* _backBufferTexture = nullptr;
+	ID3D11RenderTargetView* _backbuffer = nullptr;
+	ID3D11DepthStencilView* _depthStencilView = nullptr;
 	D3D11_VIEWPORT _viewPort;
-	ID3D11RasterizerState* _cullBackRasterizer;
+	ID3D11RasterizerState* _cullBackRasterizer = nullptr;
 	vector<ID3D11RasterizerState*> _rasterizers;
 
-	ShaderHandler* _shaderHandler;
-	BufferHandler* _bufferHandler;
-	MaterialHandler* _materialHandler;
+#ifdef _DEBUG
+	ID3D11Debug* _debugDevice = nullptr;
+#endif
+
+	ShaderHandler* _shaderHandler = nullptr;
+	BufferHandler* _bufferHandler = nullptr;
+	MaterialHandler* _materialHandler = nullptr;
 	static GUI* _gui;
-	TimerClass* _timer;
+	TimerClass* _timer = nullptr;
 
 	// Standards
-	ID3D11Buffer* _identityMatrix;
-	ID3D11BlendState* _transparencyState;
+	ID3D11Buffer* _identityMatrix = nullptr;
+	ID3D11BlendState* _transparencyState = nullptr;
 	vector<XMFLOAT3> _gridData;
-	ID3D11Buffer* _gridBuffer;
+	ID3D11Buffer* _gridBuffer = nullptr;
 	UINT _gridStrides = sizeof(XMFLOAT3);
 	UINT _gridOffsets = 0;
 
 	vector<Scene*> _scenes;
+	string _grfPath;
 
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -73,13 +73,9 @@ public:
 	Engine(HINSTANCE hInstance);
 	~Engine();
 
-	void Run(Scene* scene);
 	void Update(Scene* scene);
 	void Render(Scene* scene);
-	void HandleJobs();
 	Scene* CreateScene();
 	HWND GetWindow();
-	XMFLOAT2 GetWinDim();
-	void CreateGrid(unsigned int size = 10, float spacing = 50.f, XMFLOAT3 origo = XMFLOAT3(0.0f, 0.0f, 0.0f));
 	GUI* GetGuiHandler();
 };

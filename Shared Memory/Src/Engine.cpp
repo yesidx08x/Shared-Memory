@@ -9,20 +9,20 @@ Engine::Engine(HINSTANCE hInstance)
 	CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	_winDim = XMFLOAT2(ScreenWidth, ScreenHeight);
 
-	WNDCLASSEX wcex = { 0 };
+	WNDCLASSEXW wcex = { 0 };
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc = WndProc;
 	wcex.hInstance = hInstance;
-	wcex.lpszClassName = "Shared_Memory_Viewer";
-	RegisterClassEx(&wcex);
+	wcex.lpszClassName = L"Shared_Memory_Viewer";
+	RegisterClassExW(&wcex);
 
 	RECT rc = { 0, 0, (LONG)_winDim.x, (LONG)_winDim.y };
 	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 
-	_window = CreateWindow(
-		"Shared_Memory_Viewer",
-		"Shared Memory Viewer",
+	_window = CreateWindowW(
+		L"Shared_Memory_Viewer",
+		L"Shared Memory Viewer",
 		WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
 		0,
 		0,
@@ -49,7 +49,11 @@ Engine::Engine(HINSTANCE hInstance)
 	_hr = D3D11CreateDeviceAndSwapChain(NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
 		NULL,
+#ifdef _DEBUG
 		D3D11_CREATE_DEVICE_DEBUG,
+#else
+		NULL,
+#endif
 		NULL,
 		NULL,
 		D3D11_SDK_VERSION,
@@ -172,88 +176,97 @@ Engine::~Engine()
 	{
 		delete _scenes[i];
 	}
-}
-
-void Engine::Run(Scene * scene)
-{
-	if (_timer->FrameRun())
+	for (size_t i = 0; i < _rasterizers.size(); i++)
 	{
-		Update(scene);
-		Render(scene);
-		ShowFPS();
+		_rasterizers[i] != nullptr ? _rasterizers[i]->Release() : 0;
 	}
-	_timer->Tick();
+	_swapChain != nullptr ? _swapChain->Release() : 0;
+	_device != nullptr ? _device->Release() : 0;
+	_devcon != nullptr ? _devcon->Release() : 0;
+	_backBufferTexture != nullptr ? _backBufferTexture->Release() : 0;
+	_backbuffer != nullptr ? _backbuffer->Release() : 0;
+	_depthStencilView != nullptr ? _depthStencilView->Release() : 0;
+	_cullBackRasterizer != nullptr ? _cullBackRasterizer->Release() : 0;
+
+#ifdef _DEBUG
+	HRESULT Result = _device->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast <void**> (&_debugDevice));
+	_debugDevice->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+#endif
 }
 
 void Engine::Update(Scene * scene)
 {
-	_entityHandler = scene->GetEntityHandler();
-	HandleJobs();
-	scene->Update(_timer->frameDeltaTime());
+	if (_timer->FrameRun())
+	{
+		_entityHandler = scene->GetEntityHandler();
+		HandleJobs();
+		scene->Update(_timer->frameDeltaTime());
 
-	_bufferHandler->UpdateBuffer(*_bufferHandler->GetPBRChoice(), (void*)_gui->GetPBRChoice(), sizeof(XMINT4));
-	Camera* camera = _entityHandler->GetCamera();
-	camera->UpdateActiveCamera(*_entityHandler->GetEntity(_entityHandler->GetCamera()->GetActiveEntityID()), _timer->frameDeltaTime());
-	_bufferHandler->UpdateBuffer(*_bufferHandler->GetCamera(), &camera->GetActiveCameraData()->buffers, sizeof(CameraBuffers));
-	_bufferHandler->UpdateBuffer(*_bufferHandler->GetCameraInfo(), &camera->GetActiveCameraData()->info, sizeof(CameraInfo));
+		_bufferHandler->UpdateBuffer(*_bufferHandler->GetPBRChoice(), (void*)_gui->GetPBRChoice(), sizeof(XMINT4));
+		Camera* camera = _entityHandler->GetCamera();
+		camera->UpdateActiveCamera(*_entityHandler->GetEntity(_entityHandler->GetCamera()->GetActiveEntityID()), _timer->frameDeltaTime());
+		_bufferHandler->UpdateBuffer(*_bufferHandler->GetCamera(), &camera->GetActiveCameraData()->buffers, sizeof(CameraBuffers));
+		_bufferHandler->UpdateBuffer(*_bufferHandler->GetCameraInfo(), &camera->GetActiveCameraData()->info, sizeof(CameraInfo));
+	}
 }
 
 void Engine::Render(Scene * scene)
 {
-	BeginScene();
-
-	//vector<Entity*> entities = _entityHandler->_entities; // Wrong here
-	map<string, Entity*> entities = _entityHandler->GetEntities();
-
-	Camera* camera = _entityHandler->GetCamera();
-	SetActiveCamera(camera->GetActiveCameraData());
-	SetActiveCameraInfo(camera->GetActiveCameraData());
-	SetPBRChoice();
-	SetLight(0);
-	UINT32 offset = 0;
-
-	// Normal meshes
-	SetRasterizer(cullback);
-	_shaderHandler->SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	for (pair<string, Entity*> entity : entities) // change this later so things get sorted and unnecessary sets aren't made
+	if (_timer->FrameRun())
 	{
-		if (entity.second != nullptr)
+		BeginScene();
+
+		Camera* camera = _entityHandler->GetCamera();
+		SetActiveCamera(camera->GetActiveCameraData());
+		SetActiveCameraInfo(camera->GetActiveCameraData());
+		_devcon->PSSetConstantBuffers(3, 1, _bufferHandler->GetPBRChoice());
+		SetLight(0);
+		UINT32 offset = 0;
+		map<string, Entity*> entities = _entityHandler->GetEntities();
+
+		// Normal meshes
+		SetRasterizer(cullback);
+		_shaderHandler->SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		for (pair<string, Entity*> entity : entities) // change this later so things get sorted and unnecessary sets aren't made
 		{
-			if (entity.second->meshID != -1 && _entityHandler->GetMesh()->GetRender(*entity.second) && !_entityHandler->GetMesh()->GetTranspareny(*entity.second))
+			if (entity.second != nullptr)
 			{
-				_shaderHandler->SetShaders(entity.second->shaderID);
-				_devcon->IASetVertexBuffers(0, 1, _bufferHandler->GetVertexBuffer(entity.second->meshID), _entityHandler->GetMesh()->GetVertexSize(*entity.second), &offset);
-				SetTransformBuffer(_entityHandler->GetEntityTransform(*entity.second));
-				SetMaterials(entity.second->materialsIDs);
-				Render(_entityHandler->GetMesh()->GetVertexCount(*entity.second));
+				if (entity.second->meshID != -1 && _entityHandler->GetMesh()->GetRender(*entity.second) && !_entityHandler->GetMesh()->GetTranspareny(*entity.second))
+				{
+					_shaderHandler->SetShaders(entity.second->shaderID);
+					_devcon->IASetVertexBuffers(0, 1, _bufferHandler->GetVertexBuffer(entity.second->meshID), _entityHandler->GetMesh()->GetVertexSize(*entity.second), &offset);
+					SetTransformBuffer(_entityHandler->GetEntityTransform(*entity.second));
+					SetMaterials(entity.second->materialsIDs);
+					_devcon->Draw(_entityHandler->GetMesh()->GetVertexCount(*entity.second), 0);
+				}
 			}
 		}
-	}
 
-	// Transparent objects
-	SetRasterizer(cullnone);
-	for (pair<string, Entity*> entity : entities) // change this later so things get sorted and unnecessary sets aren't made
-	{
-		if (entity.second != nullptr)
+		// Transparent objects
+		SetRasterizer(cullnone);
+		for (pair<string, Entity*> entity : entities) // change this later so things get sorted and unnecessary sets aren't made
 		{
-			if (entity.second->meshID != -1 && _entityHandler->GetMesh()->GetRender(*entity.second) && _entityHandler->GetMesh()->GetTranspareny(*entity.second))
+			if (entity.second != nullptr)
 			{
-				if(_entityHandler->GetMesh()->GetVertexCount(*entity.second) == 1)
-					_shaderHandler->SetTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-				else
-					_shaderHandler->SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				if (entity.second->meshID != -1 && _entityHandler->GetMesh()->GetRender(*entity.second) && _entityHandler->GetMesh()->GetTranspareny(*entity.second))
+				{
+					if (_entityHandler->GetMesh()->GetVertexCount(*entity.second) == 1)
+						_shaderHandler->SetTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+					else
+						_shaderHandler->SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-				_shaderHandler->SetShaders(entity.second->shaderID);
-				_devcon->IASetVertexBuffers(0, 1, _bufferHandler->GetVertexBuffer(entity.second->meshID), _entityHandler->GetMesh()->GetVertexSize(*entity.second), &offset);
-				SetTransformBuffer(_entityHandler->GetEntityTransform(*entity.second));
-				SetMaterials(entity.second->materialsIDs);
-				Render(_entityHandler->GetMesh()->GetVertexCount(*entity.second));
+					_shaderHandler->SetShaders(entity.second->shaderID);
+					_devcon->IASetVertexBuffers(0, 1, _bufferHandler->GetVertexBuffer(entity.second->meshID), _entityHandler->GetMesh()->GetVertexSize(*entity.second), &offset);
+					SetTransformBuffer(_entityHandler->GetEntityTransform(*entity.second));
+					SetMaterials(entity.second->materialsIDs);
+					_devcon->Draw(_entityHandler->GetMesh()->GetVertexCount(*entity.second), 0);
+				}
 			}
 		}
+		EndScene();
+		ShowFPS();
 	}
-
-	//SaveImage("Iron", _backBufferTexture);
-	EndScene();
+	_timer->Tick();
 }
 
 void Engine::HandleJobs()
@@ -289,11 +302,6 @@ void Engine::HandleJobs()
 	}
 	_entityHandler->ClearShaderJobs();
 
-	//if(_entityHandler->GetLightJobs().size() > 0)
-	//	_bufferHandler->UpdateLightBuffer(_entityHandler->GetLightJobs());
-	//_entityHandler->ClearLightJobs();
-
-
 	// Lights
 	vector<LightBuffer> lightBuffers;
 	for (pair<string, Entity*> entity : _entityHandler->_entities)
@@ -310,7 +318,7 @@ void Engine::HandleJobs()
 	_bufferHandler->UpdateLightBuffer(lightBuffers);
 }
 
-Scene * Engine::CreateScene()
+Scene* Engine::CreateScene()
 {
 	_scenes.push_back(new Scene());
 	return _scenes.back();
@@ -336,12 +344,12 @@ LRESULT CALLBACK Engine::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 		break;
 	}
 
-	return DefWindowProc(hWnd, message, wParam, lParam);
+	return DefWindowProcW(hWnd, message, wParam, lParam);
 }
 
 HWND Engine::GetWindow(){return _window;}
 
-XMFLOAT2 Engine::GetWinDim(){return _winDim;}
+GUI * Engine::GetGuiHandler() { return _gui; }
 
 void Engine::SetMaterials(EntityMaterials data)
 {
@@ -361,12 +369,6 @@ void Engine::SetTransformBuffer(XMFLOAT4X4 matrix)
 	_devcon->VSSetConstantBuffers(1, 1, _bufferHandler->GetTransform());
 }
 
-GUI * Engine::GetGuiHandler(){return _gui;}
-
-TimerClass * Engine::GetTimer(){return _timer;}
-
-void Engine::Update(){}
-
 void Engine::SetActiveCamera(CameraData* data)
 {
 	_devcon->VSSetConstantBuffers(0, 1, _bufferHandler->GetCamera());
@@ -376,14 +378,12 @@ void Engine::SetActiveCamera(CameraData* data)
 
 void Engine::SetActiveCameraInfo(CameraData * data){_devcon->PSSetConstantBuffers(1, 1, _bufferHandler->GetCameraInfo());}
 
-void Engine::SetPBRChoice(){_devcon->PSSetConstantBuffers(3, 1, _bufferHandler->GetPBRChoice());}
-
 void Engine::ShowFPS()
 {
-	ostringstream outs;
+	wostringstream outs;
 	outs.precision(6);
-	outs << "3D Viewer" << "    " << "FPS:  " << _timer->fps() << "    " << "Frame Time: " << _timer->frameDeltaTime() << "  (ms)";
-	SetWindowText(_window, outs.str().c_str());
+	outs << L"3D Viewer" << L"    " << L"FPS:  " << _timer->fps() << L"    " << L"Frame Time: " << _timer->frameDeltaTime() << L"  (ms)";
+	SetWindowTextW(_window, outs.str().c_str());
 }
 
 void Engine::CreateRasterizers()
@@ -421,44 +421,6 @@ void Engine::CreateRasterizers()
 
 void Engine::SetRasterizer(RastState state){_devcon->RSSetState(_rasterizers[state]);}
 
-void Engine::RenderGrid()
-{
-	_devcon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-	_devcon->IASetVertexBuffers(0, 1, &_gridBuffer, &_gridStrides, &_gridOffsets);
-	_devcon->Draw((unsigned int)_gridData.size(), 0);
-}
-
-void Engine::CreateGrid(unsigned int size, float spacing, XMFLOAT3 origo)
-{
-	float offset = (size * spacing) / 2.0f;
-	// X-axis
-	for (size_t i = 0; i <= size; i++)
-	{
-		_gridData.push_back(XMFLOAT3((0.0f - offset) + origo.x, 0.0f + origo.y, (i * spacing - offset) + origo.z));
-		_gridData.push_back(XMFLOAT3((size * spacing - offset) + origo.x, 0.0f + origo.y, (i * spacing - offset) + origo.z));
-	}
-	// Z-axis
-	for (size_t i = 0; i <= size; i++)
-	{
-		_gridData.push_back(XMFLOAT3((i * spacing - offset) + origo.x, 0.0f + origo.y, (0.0f - offset) + origo.z));
-		_gridData.push_back(XMFLOAT3((i * spacing - offset) + origo.x, 0.0f + origo.y, (size * spacing - offset) + origo.z));
-	}
-
-	D3D11_BUFFER_DESC bufferDesc;
-	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
-	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	bufferDesc.ByteWidth = sizeof(XMFLOAT3) * (unsigned int)_gridData.size();;
-
-	D3D11_SUBRESOURCE_DATA subData;
-	subData.pSysMem = _gridData.data();
-	subData.SysMemPitch = 0;
-	subData.SysMemSlicePitch = 0;
-
-	HRESULT hr = _device->CreateBuffer(&bufferDesc, &subData, &_gridBuffer);
-}
-
 void Engine::SetLight(int id)
 {
 	_devcon->PSSetConstantBuffers(0, 1, _bufferHandler->GetLightBuffers());
@@ -472,8 +434,3 @@ void Engine::BeginScene()
 }
 
 void Engine::EndScene(){_swapChain->Present(0, 0);}
-
-void Engine::Render(unsigned int size)
-{
-	_devcon->Draw(size, 0);
-}

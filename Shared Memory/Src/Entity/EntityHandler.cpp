@@ -72,7 +72,7 @@ XMFLOAT4X4 EntityHandler::GetEntityTransform(Entity & entity){return _transform-
 EntityHandler::EntityAmounts* EntityHandler::GetEntityAmounts()
 {
 	//_entityAmounts.mesh = _mesh->GetMeshData()->size();
-	_entityAmounts.transform = _transform->_transforms.size();
+	_entityAmounts.transform = (unsigned int)_transform->_transforms.size();
 	return &_entityAmounts;
 }
 

@@ -63,9 +63,9 @@ void GUI::Create(HWND hwnd)
 
 	//SendMessage(ue4Button, WM_SETFONT, (WPARAM)hfDefault, MAKELPARAM(FALSE, 0));
 
-	_shareButton = CreateWindowEx(NULL,
-		"BUTTON",
-		"Start Shared",
+	_shareButton = CreateWindowExW(NULL,
+		L"BUTTON",
+		L"Start Shared",
 		WS_TABSTOP | WS_VISIBLE |
 		WS_CHILD | BS_DEFPUSHBUTTON,
 		0,
@@ -77,7 +77,7 @@ void GUI::Create(HWND hwnd)
 		GetModuleHandle(NULL),
 		NULL);
 
-	SendMessage(_shareButton, WM_SETFONT, (WPARAM)hfDefault, MAKELPARAM(FALSE, 0));
+	SendMessageW(_shareButton, WM_SETFONT, (WPARAM)hfDefault, MAKELPARAM(FALSE, 0));
 }
 
 void GUI::Command(HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -86,12 +86,12 @@ void GUI::Command(HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 	if (!_openShared)
 	{
-		SetWindowText(_shareButton, "Pause Sharing");
+		SetWindowTextW(_shareButton, L"Pause Sharing");
 		_openShared = true;
 	}
 	else
 	{
-		SetWindowText(_shareButton, "Resume Sharing");
+		SetWindowTextW(_shareButton, L"Resume Sharing");
 		_openShared = false;
 	}
 }

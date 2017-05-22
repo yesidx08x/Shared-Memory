@@ -19,17 +19,17 @@ class Camera
 private:
 	struct ActiveCamera
 	{
-		int cameraID;
-		string entityID;
+		int cameraID = -1;
+		string entityID = "";
 	};
 	vector<CameraData> _cameras;
-	Transform* _transform;
-	TransformData* _activeData;
+	Transform* _transform = nullptr;
+	TransformData* _activeData = nullptr;
 	ActiveCamera _activeCamera;
-	bool _shared;
+	bool _shared = false;
 
-	float _moveSpeed;
-	float _rotationSpeed;
+	float _moveSpeed = 0;
+	float _rotationSpeed = 0;
 
 	void GetKeayInput(Entity& entity, float dt);
 

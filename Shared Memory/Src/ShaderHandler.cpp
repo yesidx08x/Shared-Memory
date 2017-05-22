@@ -1,6 +1,6 @@
 #include "ShaderHandler.h"
 
-ShaderHandler::ShaderHandler(){}
+ShaderHandler::ShaderHandler() {}
 
 ShaderHandler::ShaderHandler(ID3D11Device* device, ID3D11DeviceContext* devcon)
 {
@@ -12,17 +12,18 @@ ShaderHandler::ShaderHandler(ID3D11Device* device, ID3D11DeviceContext* devcon)
 
 ShaderHandler::~ShaderHandler()
 {
+	_errorMessage != nullptr ? _errorMessage->Release() : 0;
+	_shaderBuffer != nullptr ? _shaderBuffer->Release() : 0;
 	for (size_t i = 0; i < _shaders.size(); i++)
 	{
-		_shaders[i].computeShader == nullptr ? 0 : _shaders[i].computeShader->Release();
-		_shaders[i].domainShader == nullptr ? 0 : _shaders[i].domainShader->Release();
-		_shaders[i].geometryShader == nullptr ? 0 : _shaders[i].geometryShader->Release();
-		_shaders[i].hullshader == nullptr ? 0 : _shaders[i].hullshader->Release();
-		_shaders[i].inputLayout == nullptr ? 0 : _shaders[i].inputLayout->Release();
-		_shaders[i].pixelshader == nullptr ? 0 : _shaders[i].pixelshader->Release();
-		_shaders[i].vertexShader == nullptr ? 0 : _shaders[i].vertexShader->Release();
+		_shaders[i].computeShader != nullptr ? _shaders[i].computeShader->Release() : 0;
+		_shaders[i].domainShader != nullptr ? _shaders[i].domainShader->Release() : 0;
+		_shaders[i].geometryShader != nullptr ? _shaders[i].geometryShader->Release() : 0;
+		_shaders[i].hullshader != nullptr ? _shaders[i].hullshader->Release() : 0;
+		_shaders[i].inputLayout != nullptr ? _shaders[i].inputLayout->Release() : 0;
+		_shaders[i].pixelshader != nullptr ? _shaders[i].pixelshader->Release() : 0;
+		_shaders[i].vertexShader != nullptr ? _shaders[i].vertexShader->Release() : 0;
 	}
-	_shaders.clear();
 }
 
 void ShaderHandler::LoadShaders(ShaderData data)
@@ -39,11 +40,11 @@ void ShaderHandler::LoadShaders(ShaderData data)
 	d3dShaderData.identifier = data.identifier;
 
 	if (data.vertexShader)
-		CreateVertexShader(data.identifier, d3dShaderData);
+		CreateShader(data.identifier, d3dShaderData, Vertex);
 	if (data.geometryShader)
-		CreateGeometryShader(data.identifier, d3dShaderData);
+		CreateShader(data.identifier, d3dShaderData, Geometry);
 	if (data.pixelShader)
-		CreatePixelShader(data.identifier, d3dShaderData);
+		CreateShader(data.identifier, d3dShaderData, Pixel);
 
 	_shaders.push_back(d3dShaderData);
 }
@@ -59,12 +60,13 @@ void ShaderHandler::SetShaders(int id)
 	_devcon->PSSetShader(_shaders[id].pixelshader, nullptr, 0);
 }
 
-void ShaderHandler::SetTopology(D3D_PRIMITIVE_TOPOLOGY topology){_devcon->IASetPrimitiveTopology(topology);}
+void ShaderHandler::SetTopology(D3D_PRIMITIVE_TOPOLOGY topology) { _devcon->IASetPrimitiveTopology(topology); }
 
 void ShaderHandler::CreateSamplers()
 {
 	_samplers.resize(1);
 
+	// Basic sampler
 	D3D11_SAMPLER_DESC samplerDesc;
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -140,189 +142,75 @@ void ShaderHandler::CreateInputLayout(const string & fileName, D3D11ShaderData &
 		_inputDesc.push_back({ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 });
 	}
 
-	result = _device->CreateInputLayout(_inputDesc.data(), (unsigned int)_inputDesc.size(), shaderBuffer->GetBufferPointer(), shaderBuffer->GetBufferSize(), &shaderData.inputLayout);
-	if (FAILED(result))
+	_result = _device->CreateInputLayout(_inputDesc.data(), (unsigned int)_inputDesc.size(), _shaderBuffer->GetBufferPointer(), _shaderBuffer->GetBufferSize(), &shaderData.inputLayout);
+	if (FAILED(_result))
 	{
-		PrintError("ShaderHandler::CreateVertexShader: Error creating input layout.");
+		PrintError("ShaderHandler::CreateInputLayout: Error creating input layout.");
 	}
 }
 
-void ShaderHandler::CreateVertexShader(const string& fileName, D3D11ShaderData& shaderData)
+void ShaderHandler::CreateShader(const string & fileName, D3D11ShaderData & shaderData, ShaderType shaderType)
 {
 	wstring name = _directory;
 	name.append(fileName.begin(), fileName.end());
-	name.append(L"VS.hlsl");
-	result = D3DCompileFromFile(name.c_str(), NULL, NULL, "main", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &shaderBuffer, &errorMessage);
-	if (FAILED(result))
-	{
-		if (errorMessage)
-		{
-			PrintError("ShaderHandler::CreateVertexShader: " + std::string(static_cast<const char*>(errorMessage->GetBufferPointer()), errorMessage->GetBufferSize()));
-		}
-		else
-		{
-			std::string s(fileName.begin(), fileName.end());
-			PrintError("ShaderHandler::CreateVertexShader: Shader file not found. Filename: " + s);
-		}
-	}
 
-	result = _device->CreateVertexShader(shaderBuffer->GetBufferPointer(), shaderBuffer->GetBufferSize(), NULL, &shaderData.vertexShader);
-	if (FAILED(result))
+	switch (shaderType)
 	{
-		std::string s(fileName.begin(), fileName.end());
-		PrintError("ShaderHandler::CreateVertexShader: Shader file not found. Filename: " + s);
+	case Vertex:
+		name.append(L"VS.hlsl");
+		_result = D3DCompileFromFile(name.c_str(), NULL, NULL, "main", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &_shaderBuffer, &_errorMessage);
+		HandleShaderError(_result, fileName);
+		_result = _device->CreateVertexShader(_shaderBuffer->GetBufferPointer(), _shaderBuffer->GetBufferSize(), NULL, &shaderData.vertexShader);
+		HandleShaderError(_result, fileName);
+		CreateInputLayout(fileName, shaderData);
+		break;
+	case Hull:
+		name.append(L"HS.hlsl");
+		_result = D3DCompileFromFile(name.c_str(), NULL, NULL, "main", "hs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &_shaderBuffer, &_errorMessage);
+		HandleShaderError(_result, fileName);
+		_result = _device->CreateHullShader(_shaderBuffer->GetBufferPointer(), _shaderBuffer->GetBufferSize(), NULL, &shaderData.hullshader);
+		HandleShaderError(_result, fileName);
+		break;
+	case Geometry:
+		name.append(L"GS.hlsl");
+		_result = D3DCompileFromFile(name.c_str(), NULL, NULL, "main", "gs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &_shaderBuffer, &_errorMessage);
+		HandleShaderError(_result, fileName);
+		_result = _device->CreateGeometryShader(_shaderBuffer->GetBufferPointer(), _shaderBuffer->GetBufferSize(), NULL, &shaderData.geometryShader);
+		HandleShaderError(_result, fileName);
+		break;
+	case Domain:
+		name.append(L"DS.hlsl");
+		_result = D3DCompileFromFile(name.c_str(), NULL, NULL, "main", "ds_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &_shaderBuffer, &_errorMessage);
+		HandleShaderError(_result, fileName);
+		_result = _device->CreateDomainShader(_shaderBuffer->GetBufferPointer(), _shaderBuffer->GetBufferSize(), NULL, &shaderData.domainShader);
+		HandleShaderError(_result, fileName);
+		break;
+	case Pixel:
+		name.append(L"PS.hlsl");
+		_result = D3DCompileFromFile(name.c_str(), NULL, NULL, "main", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &_shaderBuffer, &_errorMessage);
+		HandleShaderError(_result, fileName);
+		_result = _device->CreatePixelShader(_shaderBuffer->GetBufferPointer(), _shaderBuffer->GetBufferSize(), NULL, &shaderData.pixelshader);
+		HandleShaderError(_result, fileName);
+		break;
+	case Compute:
+		name.append(L"CS.hlsl");
+		_result = D3DCompileFromFile(name.c_str(), NULL, NULL, "main", "cs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &_shaderBuffer, &_errorMessage);
+		HandleShaderError(_result, fileName);
+		_result = _device->CreateComputeShader(_shaderBuffer->GetBufferPointer(), _shaderBuffer->GetBufferSize(), NULL, &shaderData.computeShader);
+		HandleShaderError(_result, fileName);
+		break;
+	default:
+		break;
 	}
-
-	CreateInputLayout(fileName, shaderData);
 }
 
-void ShaderHandler::CreateHullShader(const string& fileName, D3D11ShaderData& shaderData)
+void ShaderHandler::HandleShaderError(HRESULT result, string name)
 {
-	wstring name = _directory;
-	name.append(fileName.begin(), fileName.end());
-	name.append(L"HS.hlsl");
-	result = D3DCompileFromFile(name.c_str(), NULL, NULL, "main", "hs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &shaderBuffer, &errorMessage);
-	if (FAILED(result))
+	if (FAILED(_result))
 	{
-		if (errorMessage)
-		{
-			PrintError("ShaderHandler::CreateHullShader: " + std::string(static_cast<const char*>(errorMessage->GetBufferPointer()), errorMessage->GetBufferSize()));
-		}
+		if (_errorMessage)
+			PrintError("ShaderHandler::CreateShader: " + std::string(static_cast<const char*>(_errorMessage->GetBufferPointer()), _errorMessage->GetBufferSize()));
 		else
-		{
-			std::string s(fileName.begin(), fileName.end());
-			PrintError("ShaderHandler::CreateHullShader: Shader file not found. Filename: " + s);
-		}
+			PrintError("ShaderHandler::CreateShader: Shader file not found. Filename: " + name);
 	}
-
-	result = _device->CreateHullShader(shaderBuffer->GetBufferPointer(), shaderBuffer->GetBufferSize(), NULL, &shaderData.hullshader);
-	if (FAILED(result))
-	{
-		std::string s(fileName.begin(), fileName.end());
-		PrintError("ShaderHandler::CreateHullShader: Shader file not found. Filename: " + s);
-	}
-
-	errorMessage->Release();
-	shaderBuffer->Release();
-}
-
-void ShaderHandler::CreateGeometryShader(const string& fileName, D3D11ShaderData& shaderData)
-{
-	wstring name = _directory;
-	name.append(fileName.begin(), fileName.end());
-	name.append(L"GS.hlsl");
-	result = D3DCompileFromFile(name.c_str(), NULL, NULL, "main", "gs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &shaderBuffer, &errorMessage);
-	if (FAILED(result))
-	{
-		if (errorMessage)
-		{
-			PrintError("ShaderHandler::CreateGeometryShader: " + std::string(static_cast<const char*>(errorMessage->GetBufferPointer()), errorMessage->GetBufferSize()));
-		}
-		else
-		{
-			std::string s(fileName.begin(), fileName.end());
-			PrintError("ShaderHandler::CreateGeometryShader: Shader file not found. Filename: " + s);
-		}
-	}
-
-	result = _device->CreateGeometryShader(shaderBuffer->GetBufferPointer(), shaderBuffer->GetBufferSize(), NULL, &shaderData.geometryShader);
-	if (FAILED(result))
-	{
-		std::string s(fileName.begin(), fileName.end());
-		PrintError("ShaderHandler::CreateGeometryShader: Shader file not found.. Filename: " + s);
-	}
-
-	SAFE_RELEASE(errorMessage);
-	SAFE_RELEASE(shaderBuffer);
-}
-
-void ShaderHandler::CreateDomainShader(const string& fileName, D3D11ShaderData& shaderData)
-{
-	wstring name = _directory;
-	name.append(fileName.begin(), fileName.end());
-	name.append(L"DS.hlsl");
-	result = D3DCompileFromFile(name.c_str(), NULL, NULL, "main", "ds_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &shaderBuffer, &errorMessage);
-	if (FAILED(result))
-	{
-		if (errorMessage)
-		{
-			PrintError("ShaderHandler::CreateDomainShader: " + std::string(static_cast<const char*>(errorMessage->GetBufferPointer()), errorMessage->GetBufferSize()));
-		}
-		else
-		{
-			std::string s(fileName.begin(), fileName.end());
-			PrintError("ShaderHandler::CreateDomainShader: Shader file not found. Filename: " + s);
-		}
-	}
-
-	result = _device->CreateDomainShader(shaderBuffer->GetBufferPointer(), shaderBuffer->GetBufferSize(), NULL, &shaderData.domainShader);
-	if (FAILED(result))
-	{
-		std::string s(fileName.begin(), fileName.end());
-		PrintError("ShaderHandler::CreateDomainShader: Shader file not found. Filename: " + s);
-	}
-
-	SAFE_RELEASE(errorMessage);
-	SAFE_RELEASE(shaderBuffer);
-}
-
-void ShaderHandler::CreatePixelShader(const string& fileName, D3D11ShaderData& shaderData)
-{
-	wstring name = _directory;
-	name.append(fileName.begin(), fileName.end());
-	name.append(L"PS.hlsl");
-	result = D3DCompileFromFile(name.c_str(), NULL, NULL, "main", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &shaderBuffer, &errorMessage);
-	//result = D3DCompileFromFile(fileName, NULL, NULL, "main", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS | D3DCOMPILE_DEBUG, 0, &shaderBuffer, &errorMessage);
-	if (FAILED(result))
-	{
-		if (errorMessage)
-		{
-			PrintError("ShaderHandler::CreatePixelShader: " + std::string(static_cast<const char*>(errorMessage->GetBufferPointer()), errorMessage->GetBufferSize()));
-		}
-		else
-		{
-			std::string s(fileName.begin(), fileName.end());
-			PrintError("ShaderHandler::CreatePixelShader: Shader file not found. Filename: " + s);
-		}
-	}
-
-	result = _device->CreatePixelShader(shaderBuffer->GetBufferPointer(), shaderBuffer->GetBufferSize(), NULL, &shaderData.pixelshader);
-	if (FAILED(result))
-	{
-		std::string s(fileName.begin(), fileName.end());
-		PrintError("ShaderHandler::CreatePixelShader: Shader file not found. Filename: " + s);
-	}
-
-	SAFE_RELEASE(errorMessage);
-	SAFE_RELEASE(shaderBuffer);
-}
-
-void ShaderHandler::CreateComputeShader(const string& fileName, D3D11ShaderData& shaderData)
-{
-	wstring name = _directory;
-	name.append(fileName.begin(), fileName.end());
-	name.append(L"CS.hlsl");
-	result = D3DCompileFromFile(name.c_str(), NULL, NULL, "main", "cs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &shaderBuffer, &errorMessage);
-	if (FAILED(result))
-	{
-		if (errorMessage)
-		{
-			PrintError("ShaderHandler::CreateComputeShader: " + std::string(static_cast<const char*>(errorMessage->GetBufferPointer()), errorMessage->GetBufferSize()));
-		}
-		else
-		{
-			std::string s(fileName.begin(), fileName.end());
-			PrintError("ShaderHandler::CreateComputeShader: Shader file not found. Filename: " + s);
-		}
-	}
-
-	result = _device->CreateComputeShader(shaderBuffer->GetBufferPointer(), shaderBuffer->GetBufferSize(), NULL, &shaderData.computeShader);
-	if (FAILED(result))
-	{
-		std::string s(fileName.begin(), fileName.end());
-		PrintError("ShaderHandler::CreateComputeShader: Shader file not found. Filename: " + s);
-	}
-
-	SAFE_RELEASE(errorMessage);
-	SAFE_RELEASE(shaderBuffer);
 }

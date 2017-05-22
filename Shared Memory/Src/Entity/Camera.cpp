@@ -6,7 +6,6 @@ Camera::Camera() {}
 
 Camera::Camera(Transform* transform)
 {
-	_shared = false;
 	_transform = transform;
 }
 

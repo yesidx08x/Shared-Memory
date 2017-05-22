@@ -44,6 +44,7 @@ inline void PrintSuccess(string text)
 enum DataType { CAMERA, TRANSFORM, MESH, SKINNEDMESH, SKINCLUSTER, LIGHT, MATERIAL, HIERARCHY, SHUTDOWN, DATATYPEAMOUNT };
 enum PackageType {WHOLE, CREATE, NONE, TEXNAME, TRANSFORMID, MATERIALID, DESTROY, TRANSFORMUPDATE, PACKAGETYPEAMOUNT};
 enum MaterialType { albedo, roughness, metallic, normal, displacement, radience, irradiance, ambientocclusion, color };
+enum ShaderType { Vertex, Hull, Geometry, Domain, Pixel, Compute };
 enum LightType { point, directional, spot };
 enum GRFVersion { puntb, pu };
 
@@ -226,11 +227,11 @@ struct LightBuffer
 
 struct LightData
 {
-	LightBuffer buffer;
-	LightType type;
+	LightBuffer buffer = LightBuffer();
+	LightType type = point;
 	string identifier = "";
 	unsigned int nrOfUsers = 0;
-	bool update;
+	bool update = false;
 };
 
 struct MeshSkinnedData

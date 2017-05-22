@@ -8,26 +8,23 @@ class Viewer
 {
 public:
 	Viewer();
-	Viewer(HINSTANCE hInstance, int nCmdShow);
+	Viewer(HINSTANCE hInstance);
 	~Viewer();
-	int Run();
+	int Run(int nCmdShow);
 
 private:
-	Engine* _engine;
-	Scene* _scene;
+	Engine* _engine = nullptr;
+	Scene* _scene = nullptr;
 	HWND _wndHandle;
-	int _nCmdShow;
-	DWORD _deltaTime;
-	DWORD _startTime;
-	FBXConverter* _fbxConverter;
-	EntityHandler* _entityHandler;
-	MDataHandler* _dataHandler;
+	DWORD _deltaTime = 0;
+	DWORD _startTime = 0;
+	FBXConverter* _fbxConverter = nullptr;
+	EntityHandler* _entityHandler = nullptr;
+	MDataHandler* _dataHandler = nullptr;
 
 	void PopulateScene();
 	void Update();
 
 	float rot = 0.0f;
-	EntityHandler::EntityAmounts* _entityAmounts;
 	map<string, Entity*> _mayaEntites;
-	//vector<Entity*> _mayaEntites;
 };

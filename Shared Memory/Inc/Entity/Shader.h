@@ -12,7 +12,7 @@ struct ShaderData
 	bool pixelShader = false;
 
 	unsigned int nrOfUsers = 0;
-	string identifier;
+	string identifier = "";
 };
 
 class Shader

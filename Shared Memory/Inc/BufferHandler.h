@@ -19,7 +19,7 @@ class BufferHandler
 public:
 	struct Buffer
 	{
-		ID3D11Buffer* buffer;
+		ID3D11Buffer* buffer = nullptr;
 		string identifier;
 	};
 	BufferHandler();
@@ -33,10 +33,6 @@ public:
 
 	void UpdateLightBuffer(vector<LightBuffer> data);
 	ID3D11Buffer** GetLightBuffers();
-	unsigned int GetLightBufferSize();
-
-	ID3D11Buffer* CreateConstantBuffer(unsigned int size, void* data, string name);
-	ID3D11Buffer* CreateVertexBuffer(unsigned int size, void* data, string name);
 	void UpdateBuffer(ID3D11Buffer* buffer, void* data, unsigned int size);
 
 	ID3D11Buffer** GetTransform();
@@ -45,20 +41,19 @@ public:
 	ID3D11Buffer** GetPBRChoice();
 
 private:
-	ID3D11Device* _device;
-	ID3D11DeviceContext* _devcon;
+	ID3D11Device* _device = nullptr;
+	ID3D11DeviceContext* _devcon = nullptr;
 
 	vector<Buffer> _meshBuffers;
 	vector<Buffer> _lightBuffers;
-	ID3D11Buffer* _lightBuffer;
+	ID3D11Buffer* _lightBuffer = nullptr;
 	LightBuffer _lightDatas[LighBufferSize];
 
-	ID3D11Buffer* _transformBuffer;
-	ID3D11Buffer* _cameraBuffer;
-	ID3D11Buffer* _cameraInfoBuffer;
-	ID3D11Buffer* _pbrChoiceBuffer;
+	ID3D11Buffer* _transformBuffer = nullptr;
+	ID3D11Buffer* _cameraBuffer = nullptr;
+	ID3D11Buffer* _cameraInfoBuffer = nullptr;
+	ID3D11Buffer* _pbrChoiceBuffer = nullptr;
 	ID3D11Buffer* _nullBuffer = nullptr;
 
-	string _path;
-	void CreateStandardBuffers();
+	ID3D11Buffer* CreateBuffer(unsigned int size, void* data, string name, D3D11_BIND_FLAG bindFlag);
 };

@@ -22,5 +22,5 @@ public:
 
 private:
 	vector<LightData> _lightData;
-	Transform* _transform;
+	Transform* _transform = nullptr;
 };

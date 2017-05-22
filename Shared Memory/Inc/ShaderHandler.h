@@ -4,7 +4,6 @@
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 #include <vector>
-#include <iostream>
 #include <string>
 #include "Entity/Shader.h"
 
@@ -18,12 +17,19 @@ using namespace std;
 
 class ShaderHandler
 {
-private:
+public:
+	ShaderHandler();
+	ShaderHandler(ID3D11Device* device, ID3D11DeviceContext* devcon);
+	~ShaderHandler();
+	void LoadShaders(ShaderData data);
+	void SetShaders(int id);
+	void SetTopology(D3D_PRIMITIVE_TOPOLOGY topology);
 
-	ID3D11Device* _device;
-	ID3D11DeviceContext* _devcon;
-	HRESULT result;
-	wstring _directory;
+private:
+	ID3D11Device* _device = nullptr;
+	ID3D11DeviceContext* _devcon = nullptr;
+	HRESULT _result = S_OK;
+	wstring _directory = L"";
 
 	void CreateSamplers();
 
@@ -40,25 +46,12 @@ private:
 		string identifier;
 	};
 	vector<D3D11ShaderData> _shaders;
-	ID3DBlob* errorMessage = nullptr;
-	ID3DBlob* shaderBuffer = nullptr;
+	vector<ID3D11SamplerState*> _samplers;
+	ID3DBlob* _errorMessage = nullptr;
+	ID3DBlob* _shaderBuffer = nullptr;
 	vector<D3D11_INPUT_ELEMENT_DESC> _inputDesc;
 
 	void CreateInputLayout(const string& fileName, D3D11ShaderData& shaderData);
-	void CreateVertexShader(const string& fileName, D3D11ShaderData& shaderData);
-	void CreateHullShader(const string& fileName, D3D11ShaderData& shaderData);
-	void CreateGeometryShader(const string& fileName, D3D11ShaderData& shaderData);
-	void CreateDomainShader(const string& fileName, D3D11ShaderData& shaderData);
-	void CreatePixelShader(const string& fileName, D3D11ShaderData& shaderData);
-	void CreateComputeShader(const string& fileName, D3D11ShaderData& shaderData);
-
-	vector<ID3D11SamplerState*> _samplers;
-
-public:
-	ShaderHandler();
-	ShaderHandler(ID3D11Device* device, ID3D11DeviceContext* devcon);
-	~ShaderHandler();
-	void LoadShaders(ShaderData data);
-	void SetShaders(int id);
-	void SetTopology(D3D_PRIMITIVE_TOPOLOGY topology);
+	void CreateShader(const string& fileName, D3D11ShaderData& shaderData, ShaderType shaderType);
+	void HandleShaderError(HRESULT result, string name);
 };

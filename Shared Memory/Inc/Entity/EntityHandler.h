@@ -103,8 +103,8 @@ class EntityHandler
 public:
 	struct EntityAmounts
 	{
-		unsigned int transform;
-		unsigned int mesh;
+		unsigned int transform = -1;
+		unsigned int mesh = -1;
 	};
 	EntityHandler();
 	~EntityHandler();
@@ -131,12 +131,12 @@ public:
 private:
 	EntityAmounts _entityAmounts;
 	map<string, Entity*> _entities;
-	Mesh* _mesh;
-	Shader* _shader;
-	Transform* _transform;
-	Material* _material;
-	Camera* _camera;
-	Light* _light;
+	Mesh* _mesh = nullptr;
+	Shader* _shader = nullptr;
+	Transform* _transform = nullptr;
+	Material* _material = nullptr;
+	Camera* _camera = nullptr;
+	Light* _light = nullptr;
 
 	CameraData* GetActiveCamera();
 	LightData GetLightData(Entity& entity);

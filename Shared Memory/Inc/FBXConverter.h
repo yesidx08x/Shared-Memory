@@ -12,21 +12,21 @@ public:
 	void ConvertFile(string name, GRFVersion version);
 
 private:
-	FbxManager* _manager;
-	FbxIOSettings* _ioSettings;
-	FbxImporter* _importer;
-	FbxScene* _scene;
+	FbxManager* _manager = nullptr;
+	FbxIOSettings* _ioSettings = nullptr;
+	FbxImporter* _importer = nullptr;
+	FbxScene* _scene = nullptr;
 
 	vector<VertexData> _meshData0;
 	vector<SmallVertexData> _meshData1;
-	unsigned int _vertexCount;
+	unsigned int _vertexCount = 0;
 
-	bool _status;
+	bool _status = true;
 	ofstream _outfile;
 
-	string _exportpath;
-	string _inPath;
-	string _name;
+	string _exportpath = "";
+	string _inPath = "";
+	string _name = "";
 
 	void GetMesh0(FbxMesh* mesh);
 	void GetMesh1(FbxMesh* mesh);

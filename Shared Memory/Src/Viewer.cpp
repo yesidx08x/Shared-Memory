@@ -2,30 +2,30 @@
 
 Viewer::Viewer(){}
 
-Viewer::Viewer(HINSTANCE hInstance, int nCmdShow)
+Viewer::Viewer(HINSTANCE hInstance)
 {
 	_engine = new Engine(hInstance);
 	_fbxConverter = new FBXConverter("../FBX/", "../Exported GRF/");
 	_dataHandler = new MDataHandler();
 	_wndHandle = _engine->GetWindow();
-	_nCmdShow = nCmdShow;
 }
 
 Viewer::~Viewer()
 {
-	delete _engine;
 	delete _fbxConverter;
 	delete _dataHandler;
+	delete _engine;
 }
 
-int Viewer::Run()
+int Viewer::Run(int nCmdShow)
 {
-	MSG msg = { 0 };
 	PopulateScene();
+	MSG msg = { 0 };
 
+	// Return when application exit
 	if (_wndHandle)
 	{
-		ShowWindow(_wndHandle, _nCmdShow);
+		ShowWindow(_wndHandle, nCmdShow);
 		while (WM_QUIT != msg.message && !GetAsyncKeyState(VK_ESCAPE))
 		{
 			if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
@@ -36,7 +36,8 @@ int Viewer::Run()
 			else
 			{
 				Update();
-				_engine->Run(_scene);
+				_engine->Update(_scene);
+				_engine->Render(_scene);
 			}
 		}
 		DestroyWindow(_wndHandle);
@@ -46,11 +47,9 @@ int Viewer::Run()
 
 void Viewer::PopulateScene()
 {
-	_fbxConverter->ConvertFile("Cube", puntb);
-
+	// Add entities to the scene
 	_scene = _engine->CreateScene();
 	_entityHandler = _scene->GetEntityHandler();
-	//_entityHandler->GetCamera()->UseSharedCamera(true);
 
 	// Ligts
 	Entity* sun = _entityHandler->CreateEntity("Sun");
@@ -59,6 +58,7 @@ void Viewer::PopulateScene()
 	_entityHandler->GetLight()->SetColor(*sun, XMFLOAT4(0.99f, 0.72f, 0.07f, 1.0f));
 	_entityHandler->GetLight()->SetIntensity(*sun, 1.0f);
 
+	// Models
 	Entity* rustedIron = _entityHandler->CreateEntity("RustedIron");
 	_entityHandler->GetMesh()->BindMesh(*rustedIron, "Standards/Sphere.grf");
 	_entityHandler->GetShader()->BindShaders(*rustedIron, "PBR", true, false, false, false, true);
@@ -69,14 +69,18 @@ void Viewer::PopulateScene()
 	_entityHandler->GetMaterial()->BindMaterial(*rustedIron, "WellsRadiance.dds", radience);
 	_entityHandler->GetMaterial()->BindMaterial(*rustedIron, "WellsIrradiance.dds", irradiance);
 	_entityHandler->GetTransform()->SetPosScaleRot(*rustedIron, XMFLOAT3(5.0f, 0.0f, 0.0f), XMFLOAT3(2.0f, 2.0f, 2.0f));
-
-	_entityAmounts = _entityHandler->GetEntityAmounts();
 }
 
 void Viewer::Update()
 {
-	//Entity* rustedIron = _entityHandler->GetEntity("RustedIron");
-	//_entityHandler->GetTransform()->RotateYaw(*rustedIron, 0.00001f);
+	/*
+		Handles shared data between maya application and this program.
+		Retrieve data from a shared memory that are being handled in SharedMemory.cpp.
+		Data structures are also shared in Datastructures.h.
+		When a message are being sent by the maya application that something have been updated then
+		this program jump to correct case and retrieve the actually data.
+		After this it uses the entityhandler to create an object using the newly retrieved data.
+	*/
 
 	if (_dataHandler->SharedOpen() && _engine->GetGuiHandler()->IsSharedOpen())
 	{

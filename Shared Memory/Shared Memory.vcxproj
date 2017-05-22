@@ -64,7 +64,6 @@
     <ClInclude Include="Inc\MaterialHandler.h" />
     <ClInclude Include="Inc\Scene.h" />
     <ClInclude Include="Inc\ShaderHandler.h" />
-    <ClInclude Include="Inc\SharedStructures.h" />
     <ClInclude Include="Inc\TimerClass.h" />
     <ClInclude Include="Inc\Viewer.h" />
     <ClInclude Include="Receiver\Inc\MCamera.h" />
