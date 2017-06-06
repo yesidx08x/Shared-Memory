@@ -209,8 +209,8 @@ struct CameraInfo
 
 struct CameraData
 {
-	CameraBuffers buffers;
-	CameraInfo info;
+	CameraBuffers* buffers = nullptr;
+	CameraInfo* info;
 	XMFLOAT4 offset;
 	XMFLOAT4 upVector;
 	int transformID;
@@ -222,12 +222,12 @@ struct LightBuffer
 	XMFLOAT4 direction = XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f);
 	XMFLOAT4 position = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4 intesity = XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f);
-	XMINT4 active = XMINT4(0, 0, 0, 0);
+	int active = 0;
 };
 
 struct LightData
 {
-	LightBuffer buffer = LightBuffer();
+	LightBuffer* buffer = nullptr;
 	LightType type = point;
 	string identifier = "";
 	unsigned int nrOfUsers = 0;

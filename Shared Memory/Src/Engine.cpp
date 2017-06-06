@@ -200,13 +200,11 @@ void Engine::Update(Scene * scene)
 	{
 		_entityHandler = scene->GetEntityHandler();
 		HandleJobs();
-		scene->Update(_timer->frameDeltaTime());
 
-		_bufferHandler->UpdateBuffer(*_bufferHandler->GetPBRChoice(), (void*)_gui->GetPBRChoice(), sizeof(XMINT4));
 		Camera* camera = _entityHandler->GetCamera();
 		camera->UpdateActiveCamera(*_entityHandler->GetEntity(_entityHandler->GetCamera()->GetActiveEntityID()), _timer->frameDeltaTime());
-		_bufferHandler->UpdateBuffer(*_bufferHandler->GetCamera(), &camera->GetActiveCameraData()->buffers, sizeof(CameraBuffers));
-		_bufferHandler->UpdateBuffer(*_bufferHandler->GetCameraInfo(), &camera->GetActiveCameraData()->info, sizeof(CameraInfo));
+		_bufferHandler->UpdateBuffer(*_bufferHandler->GetCamera(), camera->GetActiveCameraData()->buffers, sizeof(CameraBuffers));
+		_bufferHandler->UpdateBuffer(*_bufferHandler->GetCameraInfo(), camera->GetActiveCameraData()->info, sizeof(CameraInfo));
 	}
 }
 
@@ -219,7 +217,6 @@ void Engine::Render(Scene * scene)
 		Camera* camera = _entityHandler->GetCamera();
 		SetActiveCamera(camera->GetActiveCameraData());
 		SetActiveCameraInfo(camera->GetActiveCameraData());
-		_devcon->PSSetConstantBuffers(3, 1, _bufferHandler->GetPBRChoice());
 		SetLight(0);
 		UINT32 offset = 0;
 		map<string, Entity*> entities = _entityHandler->GetEntities();
@@ -306,12 +303,12 @@ void Engine::HandleJobs()
 	vector<LightBuffer> lightBuffers;
 	for (pair<string, Entity*> entity : _entityHandler->_entities)
 	{
-		if (entity.second->lightID != -1 && _entityHandler->GetLightData(*entity.second).buffer.active.x == 1)
+		if (entity.second->lightID != -1 && _entityHandler->GetLightData(*entity.second).buffer->active == 1)
 		{
 			lightBuffers.push_back(LightBuffer());
-			lightBuffers.back().active.x = 1;
-			lightBuffers.back().color = _entityHandler->GetLightData(*entity.second).buffer.color;
-			lightBuffers.back().intesity = _entityHandler->GetLightData(*entity.second).buffer.intesity;
+			lightBuffers.back().active = 1;
+			lightBuffers.back().color = _entityHandler->GetLightData(*entity.second).buffer->color;
+			lightBuffers.back().intesity = _entityHandler->GetLightData(*entity.second).buffer->intesity;
 			lightBuffers.back().position = _entityHandler->GetTransform()->GetPosition(*entity.second);
 		}
 	}

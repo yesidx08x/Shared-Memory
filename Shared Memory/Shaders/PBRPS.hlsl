@@ -14,7 +14,7 @@ struct Light
 	float4 lDirection;
 	float4 lPos;
 	float4 lIntensity;
-	int4 active;
+	int active;
 };
 
 cbuffer Lights : register(b0)
@@ -55,27 +55,6 @@ float3 ReadNormalMap(float3 normal, float3 tangent, float3 bitangent, float2 uv)
 	mapNormal = 2.0f * mapNormal - 1.0f;
 	float3x3 tbn = float3x3(tangent, bitangent, normal);
 	return normalize(mul(mapNormal, tbn)).xyz;
-}
-
-float3 CalcBumpedNormal(VS_OUT indata)
-{
-	float3 Normal = normalize(indata.normal);
-	float3 Tangent = normalize(indata.tangent);
-	Tangent = normalize(Tangent - dot(Tangent, Normal) * Normal);
-	float3 Bitangent = normalize(cross(Tangent, Normal));
-	float3 BumpMapNormal = normalmap.Sample(samp, indata.tex).xyz;  //texture(gNormalMap, TexCoord0).xyz;
-																			//return BumpMapNormal;
-	BumpMapNormal = 2.0 * BumpMapNormal - float3(1.0, 1.0, 1.0);
-	float3 NewNormal;
-	float3x3 TBN = float3x3(Tangent, Bitangent, Normal);
-	NewNormal = mul(BumpMapNormal, TBN);
-	NewNormal = normalize(NewNormal);
-	return NewNormal;
-}
-
-float3 GammaCorrection(float3 color, float gamma)
-{
-	return pow(abs(color), gamma);
 }
 
 float3 F_Schlick(in float3 f0, in float f90, in float u)
@@ -124,11 +103,11 @@ float4 main(VS_OUT input) : SV_TARGET
 	float3 specularColor = lerp(0.04, albedo.rgb, metallic);
 
 	// Gamma correction
-	radience = GammaCorrection(radience, 2.2f);
-	irradience = GammaCorrection(irradience, 2.2f);
-	diffuseColor = GammaCorrection(albedo, 2.2f);
-	roughness = GammaCorrection(roughness, 2.2f);
-	metallic = GammaCorrection(metallic, 2.2f);
+	radience = pow(abs(radience), 2.2f);
+	irradience = pow(abs(irradience), 2.2f);
+	albedo.xyz = pow(abs(albedo.xyz), 2.2f);
+	roughness = pow(abs(roughness), 2.2f);
+	metallic = pow(abs(metallic), 2.2f);
 
 	float3 Cook_TorranceS = float3(0.0f, 0.0f, 0.0f);
 	float3 lambertD = float3(0.0f, 0.0f, 0.0f);
@@ -141,7 +120,7 @@ float4 main(VS_OUT input) : SV_TARGET
 
 	for (int i = 0; i < 20; i++)
 	{
-		if (light[i].active.x == 1)
+		if (light[i].active == 1)
 		{
 			float3 l = normalize(light[i].lPos - input.worldPos.xyz);
 			float NdotL = saturate(dot(n, l));
@@ -161,59 +140,7 @@ float4 main(VS_OUT input) : SV_TARGET
 	// Composit
 	float3 output = float3(0.0f, 0.0f, 0.0f);
 	output = lerp(lambertD, radience, fresnel) + Cook_TorranceS;
-	output = GammaCorrection(output, 1.0f / 2.2f);
+	output = pow(abs(output), 1.0f / 2.2f);
 
 	return float4(output, 1.0f);
-
-
-
-	//float3 n = CalcBumpedNormal(input);
-	//float3 l = normalize(lPos.xyz - input.worldPos.xyz);
-	//float3 v = normalize(camPos - input.worldPos);
-	//float3 r = normalize(reflect(v, n)).xyz;
-	//float3 h = normalize(v + l);
-	//float NdotV = saturate(dot(n, v));
-	//float NdotL = saturate(dot(n, l));
-	//float LdotH = saturate(dot(l, h));
-	//float NdotH = saturate(dot(n, h));
-
-	//float3 radiance = float3(0.0f, 0.0f, 0.0f);
-	//radiance = radiencemap.Sample(samp, r);
-	//float3 irr = irradiencemap.Sample(samp, input.worldPos.xyz);
-	//irr = float3(0.5, 0.5, 0.5);
-	//float4 albedo = albedomap.Sample(samp, input.tex);
-	//float rough = roughnessmap.Sample(samp, input.tex).r;
-	//float metal = metallicmap.Sample(samp, input.tex).r;
-
-	//float3 diffuseColor = lerp(albedo.rgb, 0.0f, metal);
-	//float3 specularColor = lerp(0.04, albedo.rgb, metal);
-
-	//// Gamma correction
-	//radiance = pow(radiance, 2.2f);
-	//irr = pow(irr, 2.2f);
-	//diffuseColor = pow(albedo, 2.2f);
-	//rough = pow(rough, 2.2f);
-	//metal = pow(metal, 2.2f);
-
-	//// Diffuse
-	//float3 lambertD = (NdotL * diffuseColor * lColor.rgb * lIntensity.x) / PI;
-
-	//// Ambient
-	//lambertD += irr * diffuseColor;
-
-	//// Ambient specular
-	//float3 fresnel = F_Schlick(specularColor, 1.0f, NdotV);
-
-	//// Specular
-	//float3 Cook_TorranceS = float3(0.0f, 0.0f, 0.0f);
-	//if (NdotL > 0.0f)
-	//	Cook_TorranceS = Cook_TorranceSpecular(n, v, l, h, rough, specularColor) * specularColor * lColor.rgb * lIntensity.x;
-
-	//// Composit
-	//float3 output = float3(0.0f, 0.0f, 0.0f);
-	//output = lerp(lambertD, radiance, fresnel);
-	//output += Cook_TorranceS;
-	//output = pow(output, 1.0f / 2.2f);
-
-	//return float4(output, 1.0f);
 }

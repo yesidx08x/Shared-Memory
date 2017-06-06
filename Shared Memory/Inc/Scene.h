@@ -6,7 +6,6 @@ class Scene
 public:
 	Scene();
 	~Scene();
-	void Update(float dt);
 	EntityHandler* GetEntityHandler();
 
 private:

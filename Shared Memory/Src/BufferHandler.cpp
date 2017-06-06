@@ -11,7 +11,6 @@ BufferHandler::BufferHandler(ID3D11Device* device, ID3D11DeviceContext* devcon)
 	_transformBuffer = CreateBuffer(sizeof(XMFLOAT4X4), &XMFLOAT4X4(), "Standard Tranform", D3D11_BIND_CONSTANT_BUFFER);
 	_cameraBuffer = CreateBuffer(sizeof(CameraBuffers), &CameraBuffers(), "Standard Camera", D3D11_BIND_CONSTANT_BUFFER);
 	_cameraInfoBuffer = CreateBuffer(sizeof(CameraInfo), &CameraInfo(), "Standard Camera Info", D3D11_BIND_CONSTANT_BUFFER);
-	_pbrChoiceBuffer = CreateBuffer(sizeof(PBRChoice), &PBRChoice(), "Standard PBRChoice", D3D11_BIND_CONSTANT_BUFFER);
 	_lightBuffer = CreateBuffer(sizeof(LightBuffer) * LighBufferSize, &LightBuffer(), "Standard LightBuffer", D3D11_BIND_CONSTANT_BUFFER);
 }
 
@@ -27,10 +26,9 @@ BufferHandler::~BufferHandler()
 	_transformBuffer->Release();
 	_cameraBuffer->Release();
 	_cameraInfoBuffer->Release();
-	_pbrChoiceBuffer->Release();
 }
 
-void BufferHandler::CreateMeshBuffer(MeshData & data)
+void BufferHandler::CreateMeshBuffer(MeshData& data)
 {
 	for (unsigned int i = 0; i < _meshBuffers.size(); i++)
 	{
@@ -121,5 +119,3 @@ ID3D11Buffer** BufferHandler::GetTransform() { return &_transformBuffer; }
 ID3D11Buffer** BufferHandler::GetCamera() { return &_cameraBuffer; }
 
 ID3D11Buffer** BufferHandler::GetCameraInfo() { return &_cameraInfoBuffer; }
-
-ID3D11Buffer** BufferHandler::GetPBRChoice() { return &_pbrChoiceBuffer; }

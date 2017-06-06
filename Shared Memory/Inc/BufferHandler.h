@@ -38,7 +38,6 @@ public:
 	ID3D11Buffer** GetTransform();
 	ID3D11Buffer** GetCamera();
 	ID3D11Buffer** GetCameraInfo();
-	ID3D11Buffer** GetPBRChoice();
 
 private:
 	ID3D11Device* _device = nullptr;
@@ -52,7 +51,6 @@ private:
 	ID3D11Buffer* _transformBuffer = nullptr;
 	ID3D11Buffer* _cameraBuffer = nullptr;
 	ID3D11Buffer* _cameraInfoBuffer = nullptr;
-	ID3D11Buffer* _pbrChoiceBuffer = nullptr;
 	ID3D11Buffer* _nullBuffer = nullptr;
 
 	ID3D11Buffer* CreateBuffer(unsigned int size, void* data, string name, D3D11_BIND_FLAG bindFlag);

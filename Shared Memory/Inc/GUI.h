@@ -17,7 +17,6 @@ class GUI
 public:
 	GUI();
 	~GUI();
-	int* GetPBRChoice();
 	void Create(HWND hwnd);
 	void Command(HWND hwnd, WPARAM wParam, LPARAM lParam);
 	bool IsSharedOpen();

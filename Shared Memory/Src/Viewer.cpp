@@ -157,8 +157,8 @@ void Viewer::Update()
 			}
 			else if (header.subType == WHOLE)
 			{
-				_entityHandler->GetLight()->SetColor(*_mayaEntites[identifier], light->GetData()->buffer.color);
-				_entityHandler->GetLight()->SetIntensity(*_mayaEntites[identifier], light->GetData()->buffer.intesity.x);
+				_entityHandler->GetLight()->SetColor(*_mayaEntites[identifier], light->GetData()->buffer->color);
+				_entityHandler->GetLight()->SetIntensity(*_mayaEntites[identifier], light->GetData()->buffer->intesity.x);
 			}
 			else if (header.subType == DESTROY)
 			{

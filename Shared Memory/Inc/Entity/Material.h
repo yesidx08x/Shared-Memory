@@ -10,7 +10,6 @@ public:
 	Material();
 	~Material();
 	void BindMaterial(Entity& entity, std::string fileName, MaterialType type, bool inMap = true);
-	vector<MaterialData> GetMaterialData();
 	vector<MaterialData> GetMaterialJobs();
 	void ClearJobs();
 

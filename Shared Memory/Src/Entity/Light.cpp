@@ -9,13 +9,19 @@ Light::Light(Transform * transform)
 	_transform = transform;
 }
 
-Light::~Light(){}
+Light::~Light()
+{
+	for (size_t i = 0; i < _lightData.size(); i++)
+	{
+		_lightData[i].buffer == nullptr ? 0 : _aligned_free(_lightData[i].buffer);
+	}
+}
 
 void Light::BindLight(Entity& entity, string name, LightType type)
 {
 	for (unsigned int i = 0; i < _lightData.size(); i++)
 	{
-		if (name == _lightData[i].identifier && _lightData[i].nrOfUsers > 0) // Look for an already loaded mesh
+		if (name == _lightData[i].identifier && _lightData[i].nrOfUsers > 0) // Look for an already loaded light
 		{
 			entity.lightID = i;
 			_lightData[i].nrOfUsers++;
@@ -23,7 +29,8 @@ void Light::BindLight(Entity& entity, string name, LightType type)
 		}
 	}
 	_lightData.push_back(LightData());
-	_lightData.back().buffer.active.x = 1;
+	_lightData.back().buffer = (LightBuffer*)_aligned_malloc(sizeof(LightBuffer), 16);;
+	_lightData.back().buffer->active = 1;
 	entity.lightID = (int)_lightData.size() - 1;
 	if (type == point)
 	{
@@ -68,7 +75,7 @@ void Light::BindLight(Entity & entity, LightData data)
 		}
 	}
 	_lightData.push_back(LightData());
-	_lightData.back().buffer.active.x = 1;
+	_lightData.back().buffer->active = 1;
 	entity.lightID = (int)_lightData.size() - 1;
 	if (data.type == point)
 	{
@@ -108,11 +115,11 @@ void Light::RemoveLight(Entity & entity)
 		_lightData[entity.lightID].nrOfUsers--;
 		if (_lightData[entity.lightID].nrOfUsers <= 0)
 		{
-			_lightData[entity.lightID].buffer.color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-			_lightData[entity.lightID].buffer.direction = XMFLOAT4(0.0f, -1.0f, 0.0f, 0.0f);
-			_lightData[entity.lightID].buffer.intesity = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-			_lightData[entity.lightID].buffer.position = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-			_lightData[entity.lightID].buffer.active.x = 0;
+			_lightData[entity.lightID].buffer->color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+			_lightData[entity.lightID].buffer->direction = XMFLOAT4(0.0f, -1.0f, 0.0f, 0.0f);
+			_lightData[entity.lightID].buffer->intesity = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+			_lightData[entity.lightID].buffer->position = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+			_lightData[entity.lightID].buffer->active = 0;
 			_lightData[entity.lightID].nrOfUsers = 0;
 			_lightData[entity.lightID].identifier = "";
 			_lightData[entity.lightID].update = false;
@@ -123,26 +130,26 @@ void Light::RemoveLight(Entity & entity)
 
 void Light::SetColor(Entity & entity, XMFLOAT4 & color)
 {
-	_lightData[entity.lightID].buffer.color = color;
+	_lightData[entity.lightID].buffer->color = color;
 	_lightData[entity.lightID].update = true;
 }
 
 void Light::SetIntensity(Entity & entity, float value)
 {
-	_lightData[entity.lightID].buffer.intesity.x = value;
+	_lightData[entity.lightID].buffer->intesity.x = value;
 	_lightData[entity.lightID].update = true;
 }
 
 void Light::SetPosition(Entity & entity, XMFLOAT4 & position)
 {
 	_transform->_transforms[entity.transformID].position = position;
-	_lightData[entity.lightID].buffer.position = position;
+	_lightData[entity.lightID].buffer->position = position;
 	_lightData[entity.lightID].update = true;
 }
 
 void Light::SetDirection(Entity & entity, XMFLOAT4 & direction)
 {
-	_lightData[entity.lightID].buffer.direction = direction;
+	_lightData[entity.lightID].buffer->direction = direction;
 	_transform->_transforms[entity.transformID].direction = direction;
 	XMVECTOR vDirection = XMLoadFloat4(&direction);
 	XMMATRIX rotMatrix = XMMatrixInverse(NULL, XMMatrixLookAtLH(XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), vDirection, XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)));

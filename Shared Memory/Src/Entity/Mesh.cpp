@@ -6,7 +6,7 @@ Mesh::Mesh()
 	_path = "GRF/";
 
 	MeshData meshData;
-	meshData.position = new XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	meshData.position = (XMFLOAT4*)_aligned_malloc(sizeof(XMFLOAT4), 16);
 	meshData.identifier = "Point";
 	meshData.nrOfUsers = INT_MAX;
 	meshData.update = false;
@@ -33,9 +33,9 @@ Mesh::~Mesh()
 {
 	for (size_t i = 0; i < _data.size(); i++)
 	{
-		_data[i].smallVertexData == nullptr ? 0 : delete _data[i].smallVertexData;
-		_data[i].vertexData == nullptr ? 0 : delete _data[i].vertexData;
-		_data[i].position == nullptr ? 0 : delete _data[i].position;
+		_data[i].smallVertexData == nullptr ? 0 : _aligned_free(_data[i].smallVertexData);
+		_data[i].vertexData == nullptr ? 0 : _aligned_free(_data[i].vertexData);
+		_data[i].position == nullptr ? 0 : _aligned_free(_data[i].position);
 	}
 }
 
@@ -79,7 +79,8 @@ void Mesh::BindMesh(Entity & entity, MeshData & data)
 	entity.meshID = (int)_data.size() - 1;
 
 	_data[entity.meshID].vertexCount = data.vertexCount;
-	_data[entity.meshID].vertexData = new VertexData[_data[entity.meshID].vertexCount];
+	//_data[entity.meshID].vertexData = new VertexData[_data[entity.meshID].vertexCount];
+	_data[entity.meshID].vertexData = (VertexData*)_aligned_malloc(sizeof(VertexData) * _data[entity.meshID].vertexCount, 16);
 	_data[entity.meshID].vertexSize = sizeof(VertexData);
 	_data[entity.meshID].vertexData = data.vertexData;
 	_data[entity.meshID].identifier = data.identifier;
@@ -151,13 +152,13 @@ void Mesh::ReadFile(string name, GRFVersion version)
 		{
 		case puntb:
 		{
-			_data.back().vertexData = new VertexData[_data.back().vertexCount];
+			_data.back().vertexData = (VertexData*)_aligned_malloc(sizeof(VertexData) * _data.back().vertexCount, 16);
 			infile.read((char*)_data.back().vertexData, _data.back().vertexSize * _data.back().vertexCount);
 		}
 			break;
 		case pu:
 		{
-			_data.back().smallVertexData = new SmallVertexData[_data.back().vertexCount];
+			_data.back().smallVertexData = (SmallVertexData*)_aligned_malloc(sizeof(SmallVertexData) * _data.back().vertexCount, 16);
 			infile.read((char*)_data.back().smallVertexData, _data.back().vertexSize * _data.back().vertexCount);
 		}
 			break;

@@ -2,6 +2,7 @@
 
 Scene::Scene()
 {
+	// Always create a scene with a camera and a skybox
 	_entityHandler = new EntityHandler();
 	_mainCamera = _entityHandler->CreateEntity("MainCamera");
 	_entityHandler->GetTransform()->SetPosition(*_mainCamera, XMFLOAT4(0.0f, 0.0f, -5.0f, 0.0f));
@@ -19,6 +20,4 @@ Scene::~Scene()
 	delete _entityHandler;
 }
 
-void Scene::Update(float dt){}
-
-EntityHandler * Scene::GetEntityHandler(){return _entityHandler;}
+EntityHandler* Scene::GetEntityHandler(){return _entityHandler;}

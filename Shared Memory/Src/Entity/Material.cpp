@@ -164,11 +164,6 @@ void Material::BindMaterial(Entity & entity, std::string fileName, MaterialType 
 	_jobMaterials.push_back(materialData);
 }
 
-vector<MaterialData> Material::GetMaterialData()
-{
-	return _materials;
-}
-
 vector<MaterialData> Material::GetMaterialJobs(){return _jobMaterials;}
 
 void Material::ClearJobs(){_jobMaterials.clear();}

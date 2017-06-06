@@ -9,12 +9,20 @@ Camera::Camera(Transform* transform)
 	_transform = transform;
 }
 
-Camera::~Camera() {}
+Camera::~Camera() 
+{
+	for (size_t i = 0; i < _cameras.size(); i++)
+	{
+		_cameras[i].buffers == nullptr ? 0 : _aligned_free(_cameras[i].buffers);
+		_cameras[i].info == nullptr ? 0 : _aligned_free(_cameras[i].info);
+	}
+}
 
 void Camera::BindCamera(Entity& entity, float fov, float aspectRatio, float nearPlane, float farPlane, bool setActive, float moveSpeed, float rotationSpeed)
 {
-	CameraData cameraData;
-	_cameras.push_back(cameraData);
+	_cameras.push_back(CameraData());
+	_cameras.back().buffers = (CameraBuffers*)_aligned_malloc(sizeof(CameraBuffers), 16);
+	_cameras.back().info = (CameraInfo*)_aligned_malloc(sizeof(CameraInfo), 16);
 	if (setActive)
 	{
 		_activeCamera.cameraID = (int)_cameras.size() - 1;
@@ -31,13 +39,13 @@ void Camera::BindCamera(Entity& entity, float fov, float aspectRatio, float near
 	_moveSpeed = moveSpeed;
 	_rotationSpeed = rotationSpeed;
 
-	_cameras.back().info.position = position;
-	_cameras.back().info.focusPoint = focusPoint;
+	_cameras.back().info->position = position;
+	_cameras.back().info->focusPoint = focusPoint;
 	_cameras.back().upVector = upVector;
 	_cameras.back().offset = offset;
 
-	XMStoreFloat4x4(&_cameras.back().buffers.projection, XMMatrixTranspose(XMMatrixPerspectiveFovLH(fov, aspectRatio, nearPlane, farPlane)));
-	XMStoreFloat4x4(&_cameras.back().buffers.view, XMMatrixTranspose(XMMatrixLookAtLH(
+	XMStoreFloat4x4(&_cameras.back().buffers->projection, XMMatrixTranspose(XMMatrixPerspectiveFovLH(fov, aspectRatio, nearPlane, farPlane)));
+	XMStoreFloat4x4(&_cameras.back().buffers->view, XMMatrixTranspose(XMMatrixLookAtLH(
 		XMVectorSet(position.x, position.y, position.z, position.w),
 		XMVectorSet(focusPoint.x, focusPoint.y, focusPoint.z, focusPoint.w),
 		XMVectorSet(upVector.x, upVector.y, upVector.z, upVector.w))));
@@ -59,17 +67,17 @@ void Camera::UpdateActiveCamera(Entity& entity, float dt)
 		XMVECTOR focusPoint = XMLoadFloat4(&_activeData->direction);
 		focusPoint = position + offset + focusPoint;
 
-		XMStoreFloat4x4(&_cameras[_activeCamera.cameraID].buffers.view, XMMatrixTranspose(XMMatrixLookAtLH(position, focusPoint, up)));
-		XMStoreFloat4(&_cameras[_activeCamera.cameraID].info.position, position);
-		XMStoreFloat4(&_cameras[_activeCamera.cameraID].info.focusPoint, position - focusPoint);
+		XMStoreFloat4x4(&_cameras[_activeCamera.cameraID].buffers->view, XMMatrixTranspose(XMMatrixLookAtLH(position, focusPoint, up)));
+		XMStoreFloat4(&_cameras[_activeCamera.cameraID].info->position, position);
+		XMStoreFloat4(&_cameras[_activeCamera.cameraID].info->focusPoint, position - focusPoint);
 	}
 }
 
 void Camera::UpdateActiveCamera(CameraData& data)
 {
 	//_cameras[_activeCamera].buffers.projection = data.buffers.projection;
-	_cameras[_activeCamera.cameraID].buffers.view = data.buffers.view;
-	_cameras[_activeCamera.cameraID].info.position = data.info.position;
+	_cameras[_activeCamera.cameraID].buffers->view = data.buffers->view;
+	_cameras[_activeCamera.cameraID].info->position = data.info->position;
 }
 
 void Camera::UseSharedCamera(bool shared){_shared = shared;}
