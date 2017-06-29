@@ -49,10 +49,10 @@ float4 main(VS_OUT input) : SV_TARGET
 	float4 tex = albedo.Sample(samp, input.tex);
 	float4 ka = float4(tex.xyz * 0.25f, tex.w);
 
-	float3 n = ReadNormalMap(input.normal, input.tangent, input.bitangent, input.tex);
-	n = normalize(input.normal);
-	float3 l = normalize(-lDirection);
-	float3 v = normalize(camPos - input.noMatrixPos);
+	float3 n = ReadNormalMap(input.normal.xyz, input.tangent.xyz, input.bitangent.xyz, input.tex);
+	n = normalize(input.normal.xyz);
+	float3 l = normalize(-lDirection.xyz);
+	float3 v = normalize(camPos.xyz - input.noMatrixPos.xyz);
 	//v = normalize(camDirection);
 	float3 r = reflect(-l, n);
 	float3 h = normalize(l + v);

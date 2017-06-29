@@ -31,5 +31,7 @@ private:
 	void GetMesh0(FbxMesh* mesh);
 	void GetMesh1(FbxMesh* mesh);
 
+#ifdef _DEBUG
 	void Check_Error(bool status);
+#endif
 };

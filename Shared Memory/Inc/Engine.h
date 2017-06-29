@@ -14,25 +14,20 @@ class Engine
 {
 private:
 	enum RastState{cullback, cullfront, cullnone, wireframe};
-	void SetLight(int id);
 	void SetMaterials(EntityMaterials data);
 	void SetTransformBuffer(XMFLOAT4X4 matrix);
 	void SetActiveCamera(CameraData* data);
 	void SetActiveCameraInfo(CameraData* data);
 	void ShowFPS();
 	void CreateRasterizers();
-	void SetRasterizer(RastState state);
-	void HandleJobs();
-
-	void BeginScene();
-	void EndScene();
 
 	EntityHandler* _entityHandler = nullptr;
 
 	// Window
 	XMFLOAT2 _winDim = XMFLOAT2(0, 0);
 	HWND _window;
-	HRESULT _hr;
+	HRESULT _hr = S_OK;
+	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	// D3D
 	IDXGISwapChain* _swapChain = nullptr;
@@ -58,15 +53,9 @@ private:
 	// Standards
 	ID3D11Buffer* _identityMatrix = nullptr;
 	ID3D11BlendState* _transparencyState = nullptr;
-	vector<XMFLOAT3> _gridData;
-	ID3D11Buffer* _gridBuffer = nullptr;
-	UINT _gridStrides = sizeof(XMFLOAT3);
-	UINT _gridOffsets = 0;
 
 	vector<Scene*> _scenes;
 	string _grfPath;
-
-	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 public:
 	Engine();

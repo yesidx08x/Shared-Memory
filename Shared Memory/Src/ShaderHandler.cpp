@@ -82,7 +82,14 @@ void ShaderHandler::CreateSamplers()
 	samplerDesc.MinLOD = -D3D11_FLOAT32_MAX;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	HRESULT hr = _device->CreateSamplerState(&samplerDesc, &_samplers[0]);
+	_result = _device->CreateSamplerState(&samplerDesc, &_samplers[0]);
+
+#ifdef _DEBUG
+	if (_result != S_OK)
+		PrintError("Could not create sampler");
+	else
+		PrintSuccess("Created sampler");
+#endif
 }
 
 void ShaderHandler::CreateInputLayout(const string & fileName, D3D11ShaderData & shaderData)
@@ -96,9 +103,14 @@ void ShaderHandler::CreateInputLayout(const string & fileName, D3D11ShaderData &
 		_inputDesc.push_back({ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 });
 		_inputDesc.push_back({ "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 });
 	}
-	else if ("Grid" == fileName)
+	else if ("Billboard" == fileName)
 	{
 		_inputDesc.push_back({ "SV_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 });
+	}
+	else if ("DirectionalLight" == fileName)
+	{
+		_inputDesc.push_back({ "SV_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 });
+		_inputDesc.push_back({ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 });
 	}
 	else if ("Cubemap" == fileName)
 	{
@@ -132,21 +144,14 @@ void ShaderHandler::CreateInputLayout(const string & fileName, D3D11ShaderData &
 		_inputDesc.push_back({ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 });
 		_inputDesc.push_back({ "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 });
 	}
-	else if ("Billboard" == fileName)
-	{
-		_inputDesc.push_back({ "SV_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 });
-	}
-	else if ("DirectionalLight" == fileName)
-	{
-		_inputDesc.push_back({ "SV_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 });
-		_inputDesc.push_back({ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 });
-	}
 
 	_result = _device->CreateInputLayout(_inputDesc.data(), (unsigned int)_inputDesc.size(), _shaderBuffer->GetBufferPointer(), _shaderBuffer->GetBufferSize(), &shaderData.inputLayout);
+#ifdef _DEBUG
 	if (FAILED(_result))
 	{
 		PrintError("ShaderHandler::CreateInputLayout: Error creating input layout.");
 	}
+#endif
 }
 
 void ShaderHandler::CreateShader(const string & fileName, D3D11ShaderData & shaderData, ShaderType shaderType)
@@ -206,6 +211,7 @@ void ShaderHandler::CreateShader(const string & fileName, D3D11ShaderData & shad
 
 void ShaderHandler::HandleShaderError(HRESULT result, string name)
 {
+#ifdef _DEBUG
 	if (FAILED(_result))
 	{
 		if (_errorMessage)
@@ -213,4 +219,5 @@ void ShaderHandler::HandleShaderError(HRESULT result, string name)
 		else
 			PrintError("ShaderHandler::CreateShader: Shader file not found. Filename: " + name);
 	}
+#endif
 }

@@ -74,7 +74,6 @@ void Material::BindMaterial(Entity & entity, std::string fileName, MaterialType 
 	{
 		if (fileName == _materials[i].identifier && _materials[i].nrOfUsers > 0) // Look for an already loaded material
 		{
-
 			if (type == albedo)
 			{
 				entity.materialsIDs.albedo = i;
@@ -115,46 +114,45 @@ void Material::BindMaterial(Entity & entity, std::string fileName, MaterialType 
 
 	MaterialData materialData;
 	materialData.identifier = fileName;
-	unsigned int vectorPos = (unsigned int)_materials.size();
 
 	if (type == albedo)
 	{
-		entity.materialsIDs.albedo = vectorPos;
+		entity.materialsIDs.albedo = _materials.size();
 		materialData.type = albedo;
 	}
 	else if (type == roughness)
 	{
-		entity.materialsIDs.roughness = vectorPos;
+		entity.materialsIDs.roughness = _materials.size();
 		materialData.type = roughness;
 	}
 	else if (type == metallic)
 	{
-		entity.materialsIDs.metallic = vectorPos;
+		entity.materialsIDs.metallic = _materials.size();
 		materialData.type = metallic;
 	}
 	else if (type == normal)
 	{
-		entity.materialsIDs.normal = vectorPos;
+		entity.materialsIDs.normal = _materials.size();
 		materialData.type = normal;
 	}
 	else if (type == displacement)
 	{
-		entity.materialsIDs.displacement = vectorPos;
+		entity.materialsIDs.displacement = _materials.size();
 		materialData.type = displacement;
 	}
 	else if (type == radience)
 	{
-		entity.materialsIDs.radience = vectorPos;
+		entity.materialsIDs.radience = _materials.size();
 		materialData.type = radience;
 	}
 	else if (type == irradiance)
 	{
-		entity.materialsIDs.irradience = vectorPos;
+		entity.materialsIDs.irradience = _materials.size();
 		materialData.type = irradiance;
 	}
 	else if (type == ambientocclusion)
 	{
-		entity.materialsIDs.ambientocclusion = vectorPos;
+		entity.materialsIDs.ambientocclusion = _materials.size();
 		materialData.type = ambientocclusion;
 	}
 

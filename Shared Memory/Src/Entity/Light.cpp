@@ -53,7 +53,7 @@ void Light::BindLight(Entity& entity, string name, LightType type)
 	if (entity.transformID > -1)
 	{
 		_transform->_transforms[entity.transformID].direction = XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f);
-		XMVECTOR vDirection = XMVector4Normalize(XMLoadFloat4(&XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f)));
+		XMVECTOR vDirection = XMVector4Normalize(XMLoadFloat4(&_transform->_transforms[entity.transformID].direction));
 		XMMATRIX rotMatrix = XMMatrixInverse(NULL, XMMatrixLookAtLH(XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), vDirection, XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)));
 		XMStoreFloat4x4(&_transform->_transforms[entity.transformID].rotation, rotMatrix);
 
@@ -98,7 +98,7 @@ void Light::BindLight(Entity & entity, LightData data)
 	if (entity.transformID > -1)
 	{
 		_transform->_transforms[entity.transformID].direction = XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f);
-		XMVECTOR vDirection = XMVector4Normalize(XMLoadFloat4(&XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f)));
+		XMVECTOR vDirection = XMVector4Normalize(XMLoadFloat4(&_transform->_transforms[entity.transformID].direction));
 		XMMATRIX rotMatrix = XMMatrixInverse(NULL, XMMatrixLookAtLH(XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), vDirection, XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)));
 		XMStoreFloat4x4(&_transform->_transforms[entity.transformID].rotation, rotMatrix);
 

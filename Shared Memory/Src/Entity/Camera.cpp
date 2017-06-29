@@ -75,7 +75,7 @@ void Camera::UpdateActiveCamera(Entity& entity, float dt)
 
 void Camera::UpdateActiveCamera(CameraData& data)
 {
-	//_cameras[_activeCamera].buffers.projection = data.buffers.projection;
+	_cameras[_activeCamera.cameraID].buffers->projection = data.buffers->projection;
 	_cameras[_activeCamera.cameraID].buffers->view = data.buffers->view;
 	_cameras[_activeCamera.cameraID].info->position = data.info->position;
 }

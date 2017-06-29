@@ -6,7 +6,7 @@ Mesh::Mesh()
 	_path = "GRF/";
 
 	MeshData meshData;
-	meshData.position = (XMFLOAT4*)_aligned_malloc(sizeof(XMFLOAT4), 16);
+	meshData.position =  new (_aligned_malloc(sizeof(XMFLOAT4), 16)) XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	meshData.identifier = "Point";
 	meshData.nrOfUsers = INT_MAX;
 	meshData.update = false;
@@ -169,8 +169,10 @@ void Mesh::ReadFile(string name, GRFVersion version)
 	}
 	infile.close();
 
+#ifdef _DEBUG
 	if(status)
 		PrintSuccess("Imported \"" + name + "\"");
 	else
 		PrintError("Could not find path \"" + name + "\"");
+#endif
 }

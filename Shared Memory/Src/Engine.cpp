@@ -139,31 +139,6 @@ Engine::Engine(HINSTANCE hInstance)
 	_bufferHandler = new BufferHandler(_device, _devcon);
 	_materialHandler = new MaterialHandler(_device, _devcon);
 	_timer = new TimerClass(60);
-
-	HRESULT hr;
-	ID3D11ShaderResourceView* resource;
-	hr = CreateDDSTextureFromFile(_device, L"Textures/Radience/WellsRadiance.dds" , nullptr, &resource, 0);
-	ID3D11Texture2D* texture;
-	ID3D11Resource *res;
-	resource->GetResource(&res);
-	hr = res->QueryInterface<ID3D11Texture2D>(&texture);
-
-	unsigned int order = 3;
-	vector<float> red;
-	vector<float> green;
-	vector<float> blue;
-	red.resize(order*order);
-	green.resize(order*order);
-	blue.resize(order*order);
-
-	//ScratchImage image;
-	////hr = LoadFromDDSFile(L"Textures/Radience/Lycksele.dds", DDS_FLAGS_NONE, nullptr, image);
-	//string cat = "SavedImages/Test.dds";
-	//CaptureTexture(_device, _devcon, texture, image);
-	////const Image* img = image.GetImage(0, 0, 0);
-	//int hej = image.GetImageCount();
-	//TexMetadata metaData = image.GetMetadata();
-	////SaveToDDSFile(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DDS_FLAGS_NONE, wstring(cat.begin(), cat.end()).c_str());
 }
 
 Engine::~Engine()
@@ -189,7 +164,7 @@ Engine::~Engine()
 	_cullBackRasterizer != nullptr ? _cullBackRasterizer->Release() : 0;
 
 #ifdef _DEBUG
-	HRESULT Result = _device->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast <void**> (&_debugDevice));
+	_hr = _device->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast <void**> (&_debugDevice));
 	_debugDevice->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
 #endif
 }
@@ -199,8 +174,54 @@ void Engine::Update(Scene * scene)
 	if (_timer->FrameRun())
 	{
 		_entityHandler = scene->GetEntityHandler();
-		HandleJobs();
 
+		// Handle jobs
+		// Meshes
+		vector<MeshData> meshJobs = _entityHandler->GetMeshJobs();
+		for (size_t i = 0; i < meshJobs.size(); i++)
+		{
+			if (meshJobs[i].nrOfUsers > 0)
+			{
+				if (!meshJobs[i].update)
+					_bufferHandler->CreateMeshBuffer(meshJobs[i]);
+				else if (meshJobs[i].update)
+					_bufferHandler->UpdateMeshBuffer(meshJobs[i]);
+			}
+			else
+				_bufferHandler->RemoveMeshBuffer(meshJobs[i].identifier);
+		}
+		_entityHandler->ClearMeshJobs();
+
+		// Materials
+		vector<MaterialData> materialJobs = _entityHandler->GetMaterialJobs();
+		for (size_t i = 0; i < materialJobs.size(); i++)
+		{
+			if (materialJobs[i].nrOfUsers > 0)
+				_materialHandler->LoadMaterial(materialJobs[i]);
+		}
+		_entityHandler->ClearMaterialJobs();
+
+		// Shaders
+		vector<ShaderData> shaderJobs = _entityHandler->GetShaderJobs();
+		for (size_t i = 0; i < shaderJobs.size(); i++)
+		{
+			if (shaderJobs[i].nrOfUsers > 0)
+				_shaderHandler->LoadShaders(shaderJobs[i]);
+		}
+		_entityHandler->ClearShaderJobs();
+
+		// Lights
+		vector<LightBuffer> lightBuffers;
+		for (pair<string, Entity*> entity : _entityHandler->_entities)
+		{
+			if (entity.second->lightID != -1 && _entityHandler->GetLightData(*entity.second).buffer->active == 1)
+			{
+				lightBuffers.push_back(*_entityHandler->GetLightData(*entity.second).buffer);
+			}
+		}
+		_bufferHandler->UpdateLightBuffer(lightBuffers);
+
+		// Update
 		Camera* camera = _entityHandler->GetCamera();
 		camera->UpdateActiveCamera(*_entityHandler->GetEntity(_entityHandler->GetCamera()->GetActiveEntityID()), _timer->frameDeltaTime());
 		_bufferHandler->UpdateBuffer(*_bufferHandler->GetCamera(), camera->GetActiveCameraData()->buffers, sizeof(CameraBuffers));
@@ -212,19 +233,23 @@ void Engine::Render(Scene * scene)
 {
 	if (_timer->FrameRun())
 	{
-		BeginScene();
+		// Clear canvas
+		float clearColor[] = { 0, 0, 0, 1 };
+		_devcon->ClearRenderTargetView(_backbuffer, clearColor);
+		_devcon->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 		Camera* camera = _entityHandler->GetCamera();
 		SetActiveCamera(camera->GetActiveCameraData());
 		SetActiveCameraInfo(camera->GetActiveCameraData());
-		SetLight(0);
+		// Light
+		_devcon->PSSetConstantBuffers(0, 1, _bufferHandler->GetLightBuffers());
 		UINT32 offset = 0;
 		map<string, Entity*> entities = _entityHandler->GetEntities();
 
 		// Normal meshes
-		SetRasterizer(cullback);
+		_devcon->RSSetState(_rasterizers[cullback]);
 		_shaderHandler->SetTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		for (pair<string, Entity*> entity : entities) // change this later so things get sorted and unnecessary sets aren't made
+		for (pair<string, Entity*> entity : entities) // Sorting needs to be done
 		{
 			if (entity.second != nullptr)
 			{
@@ -240,8 +265,8 @@ void Engine::Render(Scene * scene)
 		}
 
 		// Transparent objects
-		SetRasterizer(cullnone);
-		for (pair<string, Entity*> entity : entities) // change this later so things get sorted and unnecessary sets aren't made
+		_devcon->RSSetState(_rasterizers[cullnone]);
+		for (pair<string, Entity*> entity : entities) // Sorting needs to be done
 		{
 			if (entity.second != nullptr)
 			{
@@ -260,59 +285,10 @@ void Engine::Render(Scene * scene)
 				}
 			}
 		}
-		EndScene();
+		_swapChain->Present(0, 0);
 		ShowFPS();
 	}
 	_timer->Tick();
-}
-
-void Engine::HandleJobs()
-{
-	vector<MeshData> meshJobs = _entityHandler->GetMeshJobs();
-	for (size_t i = 0; i < meshJobs.size(); i++)
-	{
-		if (meshJobs[i].nrOfUsers > 0)
-		{
-			if(!meshJobs[i].update)
-				_bufferHandler->CreateMeshBuffer(meshJobs[i]);
-			else if (meshJobs[i].update)
-				_bufferHandler->UpdateMeshBuffer(meshJobs[i]);
-		}
-		else
-			_bufferHandler->RemoveMeshBuffer(meshJobs[i].identifier);
-	}
-	_entityHandler->ClearMeshJobs();
-
-	vector<MaterialData> materialJobs = _entityHandler->GetMaterialJobs();
-	for (size_t i = 0; i < materialJobs.size(); i++)
-	{
-		if (materialJobs[i].nrOfUsers > 0)
-			_materialHandler->LoadMaterial(materialJobs[i]);
-	}
-	_entityHandler->ClearMaterialJobs();
-
-	vector<ShaderData> shaderJobs = _entityHandler->GetShaderJobs();
-	for (size_t i = 0; i < shaderJobs.size(); i++)
-	{
-		if (shaderJobs[i].nrOfUsers > 0)
-			_shaderHandler->LoadShaders(shaderJobs[i]);
-	}
-	_entityHandler->ClearShaderJobs();
-
-	// Lights
-	vector<LightBuffer> lightBuffers;
-	for (pair<string, Entity*> entity : _entityHandler->_entities)
-	{
-		if (entity.second->lightID != -1 && _entityHandler->GetLightData(*entity.second).buffer->active == 1)
-		{
-			lightBuffers.push_back(LightBuffer());
-			lightBuffers.back().active = 1;
-			lightBuffers.back().color = _entityHandler->GetLightData(*entity.second).buffer->color;
-			lightBuffers.back().intesity = _entityHandler->GetLightData(*entity.second).buffer->intesity;
-			lightBuffers.back().position = _entityHandler->GetTransform()->GetPosition(*entity.second);
-		}
-	}
-	_bufferHandler->UpdateLightBuffer(lightBuffers);
 }
 
 Scene* Engine::CreateScene()
@@ -379,7 +355,7 @@ void Engine::ShowFPS()
 {
 	wostringstream outs;
 	outs.precision(6);
-	outs << L"3D Viewer" << L"    " << L"FPS:  " << _timer->fps() << L"    " << L"Frame Time: " << _timer->frameDeltaTime() << L"  (ms)";
+	outs << L"3D Viewer" << L"    " << L"FPS:  " << (int)_timer->fps() << L"    " << L"Frame Time: " << _timer->frameDeltaTime() << L"  (ms)";
 	SetWindowTextW(_window, outs.str().c_str());
 }
 
@@ -389,45 +365,29 @@ void Engine::CreateRasterizers()
 	_rasterizers.resize(4);
 	D3D11_RASTERIZER_DESC descRaster;
 	ZeroMemory(&descRaster, sizeof(D3D11_RASTERIZER_DESC));
-	descRaster.FillMode = D3D11_FILL_SOLID;					// WIREFRAME;
+	descRaster.FillMode = D3D11_FILL_SOLID;
 	descRaster.CullMode = D3D11_CULL_BACK;
 	descRaster.MultisampleEnable = TRUE;
 	_device->CreateRasterizerState(&descRaster, &_rasterizers[0]);
 
 	// cullfront
 	ZeroMemory(&descRaster, sizeof(D3D11_RASTERIZER_DESC));
-	descRaster.FillMode = D3D11_FILL_SOLID;					// WIREFRAME;
+	descRaster.FillMode = D3D11_FILL_SOLID;
 	descRaster.CullMode = D3D11_CULL_FRONT;
 	descRaster.MultisampleEnable = TRUE;
 	_device->CreateRasterizerState(&descRaster, &_rasterizers[1]);
 
 	// cullnone
 	ZeroMemory(&descRaster, sizeof(D3D11_RASTERIZER_DESC));
-	descRaster.FillMode = D3D11_FILL_SOLID;					// WIREFRAME;
+	descRaster.FillMode = D3D11_FILL_SOLID;
 	descRaster.CullMode = D3D11_CULL_NONE;
 	descRaster.MultisampleEnable = TRUE;
 	_device->CreateRasterizerState(&descRaster, &_rasterizers[2]);
 
 	// wireframe
 	ZeroMemory(&descRaster, sizeof(D3D11_RASTERIZER_DESC));
-	descRaster.FillMode = D3D11_FILL_WIREFRAME;					// WIREFRAME;
+	descRaster.FillMode = D3D11_FILL_WIREFRAME;
 	descRaster.CullMode = D3D11_CULL_NONE;
 	descRaster.MultisampleEnable = TRUE;
 	_device->CreateRasterizerState(&descRaster, &_rasterizers[3]);
 }
-
-void Engine::SetRasterizer(RastState state){_devcon->RSSetState(_rasterizers[state]);}
-
-void Engine::SetLight(int id)
-{
-	_devcon->PSSetConstantBuffers(0, 1, _bufferHandler->GetLightBuffers());
-}
-
-void Engine::BeginScene()
-{
-	float clearColor[] = { 0, 0, 0, 1 };
-	_devcon->ClearRenderTargetView(_backbuffer, clearColor);
-	_devcon->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-}
-
-void Engine::EndScene(){_swapChain->Present(0, 0);}

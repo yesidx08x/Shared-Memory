@@ -1,5 +1,4 @@
 #pragma once
-#include <windows.h>
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
@@ -12,8 +11,6 @@ using namespace std;
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
-
-#define SAFE_RELEASE(x) if( x ) { (x)->Release(); (x) = nullptr; }
 
 class ShaderHandler
 {

@@ -29,15 +29,19 @@ void FBXConverter::ConvertFile(string name, GRFVersion version)
 	_inPath = _inPath + name + ".fbx";
 
 	_status = _importer->Initialize(_inPath.data(), -1, _manager->GetIOSettings());
+#ifdef _DEBUG
 	Check_Error(_status);
+#endif
 
 	// Import scene
 	_scene = FbxScene::Create(_manager, "RootScene");
 	_status = _importer->Import(_scene);
+#ifdef _DEBUG
 	Check_Error(_status);
+#endif
 	_importer->Destroy();
 
-	// Print nodes
+	// Convert mesh
 	FbxNode* rootNode = _scene->GetRootNode();
 	if (rootNode)
 	{
@@ -123,10 +127,14 @@ void FBXConverter::GetMesh0(FbxMesh* mesh)
 			// Data
 			_outfile.write((char*)_meshData0.data(), sizeof(VertexData) * _meshData0.size());
 
+#ifdef _DEBUG
 			PrintSuccess("Exported mesh \"" + _name + "\"");
+#endif
 		}
+#ifdef _DEBUG
 		else
 			PrintError("Could not write to path \"" + _exportpath + "\"");
+#endif
 		_outfile.close();
 	}
 }
@@ -150,6 +158,7 @@ void FBXConverter::GetMesh1(FbxMesh* mesh)
 			{
 				_meshData1.push_back(SmallVertexData());
 
+				// Vertices
 				_meshData1.back().vertex = XMFLOAT3((float)mesh->GetControlPointAt(mesh->GetPolygonVertex(i, j)).mData[0],
 					(float)mesh->GetControlPointAt(mesh->GetPolygonVertex(i, j)).mData[1],
 					(float)mesh->GetControlPointAt(mesh->GetPolygonVertex(i, j)).mData[2]);
@@ -172,14 +181,19 @@ void FBXConverter::GetMesh1(FbxMesh* mesh)
 			// Data
 			_outfile.write((char*)_meshData1.data(), sizeof(SmallVertexData) * _meshData1.size());
 
+#ifdef _DEBUG
 			PrintSuccess("Exported mesh \"" + _name + "\"");
+#endif
 		}
+#ifdef _DEBUG
 		else
 			PrintError("Could not write to path \"" + _exportpath + "\"");
+#endif
 		_outfile.close();
 	}
 }
 
+#ifdef _DEBUG
 void FBXConverter::Check_Error(bool status)
 {
 	if (!status)
@@ -190,3 +204,4 @@ void FBXConverter::Check_Error(bool status)
 		SetConsoleTextAttribute(winHandle, 15);
 	}
 }
+#endif

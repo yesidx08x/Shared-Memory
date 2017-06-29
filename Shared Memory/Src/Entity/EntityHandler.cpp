@@ -47,7 +47,7 @@ Entity * EntityHandler::GetEntity(string identifier)
 	}
 	catch (const std::out_of_range& e) 
 	{
-		PrintError("Could not find entity \"" + identifier + "\"");
+		PrintError("Could not find entity \"" + identifier + " " + e.what() + "\"");
 	}
 
 	return entity;

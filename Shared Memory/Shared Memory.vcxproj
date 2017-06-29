@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -26,8 +26,6 @@
     <ClCompile Include="Receiver\Src\MMaterial.cpp" />
     <ClCompile Include="Receiver\Src\MMesh.cpp" />
     <ClCompile Include="Receiver\Src\MObject.cpp" />
-    <ClCompile Include="Receiver\Src\MSkinCluster.cpp" />
-    <ClCompile Include="Receiver\Src\MSkinnedMesh.cpp" />
     <ClCompile Include="Receiver\Src\MTransform.cpp" />
     <ClCompile Include="Src\BufferHandler.cpp" />
     <ClCompile Include="Src\Engine.cpp" />
@@ -72,8 +70,6 @@
     <ClInclude Include="Receiver\Inc\MMaterial.h" />
     <ClInclude Include="Receiver\Inc\MMesh.h" />
     <ClInclude Include="Receiver\Inc\MObject.h" />
-    <ClInclude Include="Receiver\Inc\MSkinCluster.h" />
-    <ClInclude Include="Receiver\Inc\MSkinnedMesh.h" />
     <ClInclude Include="Receiver\Inc\MTransform.h" />
   </ItemGroup>
   <ItemGroup>
@@ -257,32 +253,32 @@
     <ProjectGuid>{A1A33AA9-384C-49AB-B891-D3B62EA58312}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>SharedMemory</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -306,12 +302,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\stahl\Visual Studio 2015\Git Repositories\Shared Memory\Shared_Memory\Shared Memory\Inc;$(IncludePath)</IncludePath>
+    <IncludePath>../Visual Leak Detector\include</IncludePath>
+    <LibraryPath>../Visual Leak Detector/lib/Win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\stahl\Visual Studio 2015\Visualizers\Visual Leak Detector\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\stahl\Visual Studio 2015\Visualizers\Visual Leak Detector\lib\Win64;$(LibraryPath)</LibraryPath>
+    <IncludePath>../Visual Leak Detector\include;$(IncludePath)</IncludePath>
+    <LibraryPath>../Visual Leak Detector/lib/Win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -326,12 +323,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions);_AFXDLL</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Custom\Autodesk\FBX\2017.0.1\include;C:\Users\stahl\Visual Studio 2015\Git Repositories\Shared Memory\Shared_Memory\Shared files;C:\Users\stahl\Visual Studio 2015\Git Repositories\Shared Memory\Shared_Memory\Shared Memory\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Inc;../Shared files;../FBX/2017.0.1/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Custom\Autodesk\FBX\2017.0.1\lib\vs2015\x64\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../FBX\2017.0.1\lib\vs2015\x64\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
@@ -345,12 +342,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;FBXSDK_SHARED</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Custom\Autodesk\FBX\2017.0.1\include;C:\Users\stahl\Visual Studio 2015\Git Repositories\Shared Memory\Shared_Memory\Shared files;C:\Users\stahl\Visual Studio 2015\Git Repositories\Shared Memory\Shared_Memory\Shared Memory\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Inc;../Shared files;../FBX/2017.0.1/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Custom\Autodesk\FBX\2017.0.1\lib\vs2015\x64\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../FBX\2017.0.1\lib\vs2015\x64\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
@@ -366,7 +363,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions);_AFXDLL</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Custom\Autodesk\FBX\2017.0.1\include;C:\Users\stahl\Visual Studio 2015\Git Repositories\Shared Memory\Shared_Memory\Shared files;C:\Users\stahl\Visual Studio 2015\Git Repositories\Shared Memory\Shared_Memory\Shared Memory\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Inc;../Shared files;../FBX/2017.0.1/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -389,7 +386,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions);_AFXDLL</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Custom\Autodesk\FBX\2017.0.1\include;C:\Users\stahl\Visual Studio 2015\Git Repositories\Shared Memory\Shared_Memory\Shared files;C:\Users\stahl\Visual Studio 2015\Git Repositories\Shared Memory\Shared_Memory\Shared Memory\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Inc;../Shared files;../FBX/2017.0.1/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

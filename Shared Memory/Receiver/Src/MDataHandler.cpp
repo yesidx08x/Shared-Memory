@@ -12,10 +12,6 @@ MDataHandler::~MDataHandler()
 
 vector<MMesh*>* MDataHandler::GetMeshes() { return &_meshes; }
 
-vector<MSkinnedMesh*>* MDataHandler::GetSkinnedMeshes() { return &_skinnedMeshes; }
-
-vector<MSkinCluster*>* MDataHandler::GetSkinClusters(){return &_skinClusters;}
-
 vector<MTransform*>* MDataHandler::GetTransforms() { return &_transforms; }
 
 vector<MLight*>* MDataHandler::GetLights() { return &_lights; }
@@ -29,10 +25,6 @@ MCamera* MDataHandler::GetCamera() { return &_camera; }
 UINT32* MDataHandler::GetMeshStrides(){return &meshStrides;}
 
 UINT32* MDataHandler::GetMeshOffsets(){return &meshOffsets;}
-
-UINT32* MDataHandler::GetSkinnedMeshStrides(){return &skinnedMeshStrides;}
-
-UINT32* MDataHandler::GetSkinnedMeshOffsets(){return &skinnedMeshOffsets;}
 
 DataType MDataHandler::Update()
 {
@@ -53,12 +45,6 @@ DataType MDataHandler::Update()
 				break;
 			case TRANSFORM:
 				TransformHandler();
-				break;
-			case SKINNEDMESH:
-				SkinnedMeshHandler();
-				break;
-			case SKINCLUSTER:
-				SkinClusterHandler();
 				break;
 			case MESH:
 				MeshHandler();
@@ -98,34 +84,6 @@ void MDataHandler::MeshHandler()
 		_meshes.push_back(new MMesh(_sharedMemory._buffer, _circInfo.tail));
 	else
 		_meshes[_messageHeader.id]->ReadData(_sharedMemory._buffer, _circInfo.tail, _packageType);
-}
-
-void MDataHandler::SkinnedMeshHandler()
-{
-	if (_packageType == DESTROY)
-	{
-		ReadIdentifier();
-		delete _skinnedMeshes[_messageHeader.id];
-		_skinnedMeshes[_messageHeader.id] = nullptr;
-	}
-	else if (_packageType == CREATE)
-		_skinnedMeshes.push_back(new MSkinnedMesh(_sharedMemory._buffer, _circInfo.tail));
-	else
-		_skinnedMeshes[_messageHeader.id]->ReadData(_sharedMemory._buffer, _circInfo.tail, _packageType);
-}
-
-void MDataHandler::SkinClusterHandler()
-{
-	if (_packageType == DESTROY)
-	{
-		ReadIdentifier();
-		delete _skinClusters[_messageHeader.id];
-		_skinClusters[_messageHeader.id] = nullptr;
-	}
-	else if (_packageType == CREATE)
-		_skinClusters.push_back(new MSkinCluster(_sharedMemory._buffer, _circInfo.tail));
-	else
-		_skinClusters[_messageHeader.id]->ReadData(_sharedMemory._buffer, _circInfo.tail, _packageType);
 }
 
 void MDataHandler::TransformHandler()
@@ -186,8 +144,6 @@ void MDataHandler::ReadIdentifier()
 void MDataHandler::ShutDown()
 {
 	_meshes.clear();
-	_skinnedMeshes.clear();
-	_skinClusters.clear();
 	_lights.clear();
 	_materials.clear();
 	_transforms.clear();

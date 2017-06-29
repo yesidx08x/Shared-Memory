@@ -51,75 +51,75 @@ enum GRFVersion { puntb, pu };
 // Headers
 struct MessageHeader
 {
-	unsigned int type;
-	unsigned int subType;
-	unsigned int size;
-	unsigned int id;
+	unsigned int type = 0;
+	unsigned int subType = 0;
+	unsigned int size = 0;
+	unsigned int id = 0;
 };
 
 struct MeshHeader
 {
-	unsigned int vertexCount;
-	unsigned int transformID;
-	unsigned int materialID;
+	unsigned int vertexCount = 0;
+	unsigned int transformID = 0;
+	unsigned int materialID = 0;
 
 
-	unsigned int identifierSize;
-	unsigned int transformIDSize;
-	unsigned int materialIDSize;
+	unsigned int identifierSize = 0;
+	unsigned int transformIDSize = 0;
+	unsigned int materialIDSize = 0;
 };
 
 struct TransformHeader
 {
-	unsigned int identifierSize;
+	unsigned int identifierSize = 0;
 };
 
 struct SkinnedMeshHeader
 {
-	unsigned int vertexCount;
-	unsigned int transformID;
-	unsigned int materialID;
-	unsigned int skinClusterID;
+	unsigned int vertexCount = 0;
+	unsigned int transformID = 0;
+	unsigned int materialID = 0;
+	unsigned int skinClusterID = 0;
 };
 
 struct MaterialHeader
 {
-	unsigned int albedoSize;
-	unsigned int roughnessSize;
-	unsigned int metallicSize;
-	unsigned int normalSize;
-	unsigned int displacementSize;
-	unsigned int radienceSize;
-	unsigned int irradienceSize;
+	unsigned int albedoSize = 0;
+	unsigned int roughnessSize = 0;
+	unsigned int metallicSize = 0;
+	unsigned int normalSize = 0;
+	unsigned int displacementSize = 0;
+	unsigned int radienceSize = 0;
+	unsigned int irradienceSize = 0;
 };
 
 struct SkinClusterHeader
 {
-	unsigned int jointAmount;
-	unsigned int jointIndex;
+	unsigned int jointAmount = 0;
+	unsigned int jointIndex = 0;
 };
 
 struct LightHeader
 {
-	unsigned int type;
-	unsigned int identifierSize;
-	unsigned int transformIDSize;
+	unsigned int type = 0;
+	unsigned int identifierSize = 0;
+	unsigned int transformIDSize = 0;
 };
 
 // Datas
 struct VertexData
 {
-	XMFLOAT3 vertex;
-	XMFLOAT2 uv;
-	XMFLOAT3 normal;
-	XMFLOAT3 tanget;
-	XMFLOAT3 bitanget;
+	XMFLOAT3 vertex = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT2 uv = XMFLOAT2(0.0f, 0.0f);
+	XMFLOAT3 normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3 tanget = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3 bitanget = XMFLOAT3(0.0f, 0.0f, 0.0f);
 };
 
 struct SmallVertexData
 {
-	XMFLOAT3 vertex;
-	XMFLOAT2 uv;
+	XMFLOAT3 vertex = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT2 uv = XMFLOAT2(0.0f, 0.0f);
 };
 
 struct MeshData
@@ -128,22 +128,22 @@ struct MeshData
 	SmallVertexData* smallVertexData = nullptr;
 	XMFLOAT4* position = nullptr;
 
-	GRFVersion version;
+	GRFVersion version = GRFVersion::pu;
 	unsigned int nrOfUsers = 0;
 	string identifier = "";
-	unsigned int vertexCount;
-	unsigned int vertexSize;
-	bool render;
-	bool update;
-	bool transparency;
+	unsigned int vertexCount = 0;
+	unsigned int vertexSize = 0;
+	bool render = true;
+	bool update = true;
+	bool transparency = false;
 };
 
 struct ColorData
 {
-	XMFLOAT4 color;
-	XMFLOAT4 transparency;
-	XMFLOAT4 ambient;
-	XMFLOAT4 hasTexture;
+	XMFLOAT4 color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	XMFLOAT4 transparency = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	XMFLOAT4 ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	XMFLOAT4 hasTexture = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 };
 
 struct MaterialData
@@ -157,9 +157,13 @@ struct MaterialData
 
 struct MatrixData
 {
-	XMFLOAT4 position;
-	XMFLOAT4 scale;
-	XMFLOAT4X4 rotation;
+	XMFLOAT4 position = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	XMFLOAT4 scale = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	XMFLOAT4X4 rotation = XMFLOAT4X4(
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f);
 };
 
 struct TransformData
@@ -185,35 +189,38 @@ struct TransformData
 
 	MatrixData transform;
 
-	string identifier;
+	string identifier = "";
 	unsigned int nrOfUsers = 0;
 	unsigned int parent = -1;
 };
 
-struct PBRChoice
-{
-	XMINT4 brdf;
-};
-
 struct CameraBuffers
 {
-	XMFLOAT4X4 view;
-	XMFLOAT4X4 projection;
+	XMFLOAT4X4 view = XMFLOAT4X4(
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f);
+	XMFLOAT4X4 projection = XMFLOAT4X4(
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f);
 };
 
 struct CameraInfo
 {
-	XMFLOAT4 position;
-	XMFLOAT4 focusPoint;
+	XMFLOAT4 position = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	XMFLOAT4 focusPoint = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 };
 
 struct CameraData
 {
 	CameraBuffers* buffers = nullptr;
-	CameraInfo* info;
-	XMFLOAT4 offset;
-	XMFLOAT4 upVector;
-	int transformID;
+	CameraInfo* info = nullptr;
+	XMFLOAT4 offset = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);;
+	XMFLOAT4 upVector = XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);;
+	int transformID = 0;
 };
 
 struct LightBuffer
@@ -232,18 +239,4 @@ struct LightData
 	string identifier = "";
 	unsigned int nrOfUsers = 0;
 	bool update = false;
-};
-
-struct MeshSkinnedData
-{
-	XMFLOAT3 vertex;
-	XMFLOAT2 uv;
-	XMFLOAT3 normal;
-	XMFLOAT4 boneIndices;
-	XMFLOAT4 boneWeights;
-};
-
-struct SkinClusterData
-{
-	XMFLOAT4X4 matrix;
 };

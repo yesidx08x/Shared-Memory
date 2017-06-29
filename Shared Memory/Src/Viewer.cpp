@@ -140,10 +140,6 @@ void Viewer::Update()
 			}
 		}
 			break;
-		case SKINNEDMESH:
-			break;
-		case SKINCLUSTER:
-			break;
 		case LIGHT:
 		{
 			MLight* light = _dataHandler->GetLights()->at(header.id);
@@ -166,10 +162,6 @@ void Viewer::Update()
 				_entityHandler->GetLight()->RemoveLight(*entity);
 			}
 		}
-			break;
-		case MATERIAL:
-			break;
-		case HIERARCHY:
 			break;
 		case SHUTDOWN:
 		{

@@ -17,7 +17,6 @@ MaterialHandler::~MaterialHandler()
 		{
 			int hej = _materials[i].resource->Release();
 		}
-		//_materials[i].resource != nullptr ? _materials[i].resource->Release() : 0;
 	}
 }
 
@@ -95,10 +94,12 @@ void MaterialHandler::LoadMaterial(MaterialData& data)
 			hr = CreateDDSTextureFromFile(_device, _devcon, fullPath.c_str(), nullptr, &_materials.back().resource);
 	}
 
+#ifdef _DEBUG
 	if (hr != S_OK)
 		PrintError("Could not load texture \"" + data.identifier + "\"");
 	else
 		PrintSuccess("Loaded texture \"" + data.identifier + "\"");
+#endif
 }
 
 ID3D11ShaderResourceView** MaterialHandler::GetMaterial(unsigned int id){return &_materials[id].resource;}

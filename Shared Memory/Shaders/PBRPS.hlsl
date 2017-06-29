@@ -88,14 +88,14 @@ float3 Cook_TorranceSpecular(float3 n, float3 v, float3 l, float3 h, float rough
 
 float4 main(VS_OUT input) : SV_TARGET
 {
-	float3 n = ReadNormalMap(input.normal, input.tangent, input.bitangent, input.tex).xyz;
+	float3 n = ReadNormalMap(input.normal.xyz, input.tangent.xyz, input.bitangent.xyz, input.tex).xyz;
 	float3 v = normalize(camPos.xyz - input.worldPos.xyz);
 	float3 r = normalize(reflect(-v, n)).xyz;
 	float NdotV = saturate(dot(n, v));
 
-	float3 radience = radiencemap.Sample(samp, r);
-	float3 irradience = irradiencemap.Sample(samp, input.worldPos.xyz);
-	float4 albedo = albedomap.Sample(samp, input.tex);
+	float3 radience = radiencemap.Sample(samp, r).rgb;
+	float3 irradience = irradiencemap.Sample(samp, input.worldPos.xyz).rgb;
+	float4 albedo = albedomap.Sample(samp, input.tex).rgba;
 	float roughness = roughnessmap.Sample(samp, input.tex).r;
 	float metallic = metallicmap.Sample(samp, input.tex).r;
 
@@ -122,17 +122,17 @@ float4 main(VS_OUT input) : SV_TARGET
 	{
 		if (light[i].active == 1)
 		{
-			float3 l = normalize(light[i].lPos - input.worldPos.xyz);
+			float3 l = normalize(light[i].lPos.xyz - input.worldPos.xyz);
 			float NdotL = saturate(dot(n, l));
 			float3 h = normalize(v + l);
 
 			// Diffuse
-			lambertD += (NdotL * diffuseColor * light[i].lColor * light[i].lIntensity.x) / PI;
+			lambertD += (NdotL * diffuseColor * light[i].lColor.rgb * light[i].lIntensity.x) / PI;
 
 			// Specular
 			if (NdotL > 0.0f)
 			{
-				Cook_TorranceS += Cook_TorranceSpecular(n, v, l, h, roughness, specularColor) * specularColor * light[i].lColor * light[i].lIntensity.x;
+				Cook_TorranceS += Cook_TorranceSpecular(n, v, l, h, roughness, specularColor) * specularColor * light[i].lColor.rgb * light[i].lIntensity.x;
 			}
 		}
 	}

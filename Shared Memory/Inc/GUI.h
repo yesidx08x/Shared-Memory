@@ -22,8 +22,6 @@ public:
 	bool IsSharedOpen();
 
 private:
-	static XMINT4 _pbrChoice;
 	static bool _openShared;
-
 	static HWND _shareButton;
 };

@@ -11,7 +11,7 @@ public:
 	CameraData* GetData();
 
 private:
-	CameraData* _data;
+	CameraData* _data = nullptr;
 
 	void ReadWhole(void* buffer, unsigned int& tail);
 };

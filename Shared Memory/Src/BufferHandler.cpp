@@ -72,7 +72,7 @@ ID3D11Buffer* BufferHandler::CreateBuffer(unsigned int size, void* data, string 
 
 void BufferHandler::RemoveMeshBuffer(string identifier)
 {
-	// Completely remove buffer from pipeline in DirectX
+	// Remove buffer from pipeline in DirectX
 	for (size_t i = 0; i < _meshBuffers.size(); i++)
 	{
 		if (_meshBuffers[i].identifier == identifier)
