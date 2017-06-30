@@ -6,14 +6,6 @@
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dcompiler.lib")
 
-template< class T > void SafeRelease(T*& pVal)
-{
-	if (pVal != nullptr)
-	{
-		pVal->Release();
-	}
-}
-
 class MObject
 {
 public:

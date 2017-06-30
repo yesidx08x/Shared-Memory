@@ -62,9 +62,9 @@ void Camera::UpdateActiveCamera(Entity& entity, float dt)
 		GetKeayInput(entity, dt);
 		_activeData = &_transform->_transforms[_cameras[_activeCamera.cameraID].transformID];
 		XMVECTOR offset = DirectX::XMVectorSet(_cameras[_activeCamera.cameraID].offset.x, _cameras[_activeCamera.cameraID].offset.y, _cameras[_activeCamera.cameraID].offset.z, 0.0f);
-		XMVECTOR position = XMLoadFloat4(&_activeData->position);
-		XMVECTOR up = XMLoadFloat4(&_activeData->up);
-		XMVECTOR focusPoint = XMLoadFloat4(&_activeData->direction);
+		XMVECTOR position = XMLoadFloat4(&_activeData->transform.position);
+		XMVECTOR up = XMLoadFloat4(&_activeData->transform.up);
+		XMVECTOR focusPoint = XMLoadFloat4(&_activeData->transform.direction);
 		focusPoint = position + offset + focusPoint;
 
 		XMStoreFloat4x4(&_cameras[_activeCamera.cameraID].buffers->view, XMMatrixTranspose(XMMatrixLookAtLH(position, focusPoint, up)));

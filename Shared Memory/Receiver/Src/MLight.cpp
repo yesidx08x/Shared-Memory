@@ -9,17 +9,18 @@ MLight::MLight(void * buffer, unsigned int & tail)
 	ReadData(buffer, tail);
 }
 
-MLight::~MLight() {}
+MLight::~MLight() 
+{
+	_data->buffer == nullptr ? 0 : delete _data->buffer;
+	delete _header;
+	delete _data;
+}
 
 void MLight::ReadData(void* buffer, unsigned int& tail, PackageType packageType)
 {
 	// Header
 	memcpy(_header, (char*)buffer + tail, sizeof(LightHeader));
 	tail += sizeof(LightHeader);
-	// Identifier
-	_data->identifier.resize(_header->identifierSize);
-	memcpy((char*)_data->identifier.data(), (char*)buffer + tail, _header->identifierSize);
-	tail += _header->identifierSize;
 	// Transform Identifier
 	_transformIdentifier.resize(_header->transformIDSize);
 	memcpy((char*)_transformIdentifier.data(), (char*)buffer + tail, _header->transformIDSize);

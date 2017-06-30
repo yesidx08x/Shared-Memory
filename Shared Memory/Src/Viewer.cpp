@@ -80,6 +80,9 @@ void Viewer::Update()
 		When a message are being sent by the maya application that something have been updated then
 		this program jump to correct case and retrieve the actually data.
 		After this it uses the entityhandler to create an object using the newly retrieved data.
+
+		Please note that this section with shared memory does not fully work because some bugs occurred
+		when cleaning the project.
 	*/
 
 	if (_dataHandler->SharedOpen() && _engine->GetGuiHandler()->IsSharedOpen())
@@ -89,23 +92,23 @@ void Viewer::Update()
 		switch (type)
 		{
 		case CAMERA:
-			_entityHandler->GetCamera()->UpdateActiveCamera(*_dataHandler->GetCamera()->GetData());
+			//_entityHandler->GetCamera()->UpdateActiveCamera(*_dataHandler->GetCamera()->GetData());
 			break;
 		case TRANSFORM:
 		{
-			MTransform* transform = _dataHandler->GetTransforms()->at(header.id);
+			MTransform* transform = _dataHandler->GetTransform(_dataHandler->GetIdentifier());
 			if (header.subType == CREATE)
 			{
-				Entity* entity = _entityHandler->CreateEntity(transform->GetData()->identifier, false);
+				Entity* entity = _entityHandler->CreateEntity(_dataHandler->GetIdentifier(), false);
 				_entityHandler->GetTransform()->BindTransform(*entity, *transform->GetData());
-				_mayaEntites.insert(pair<string, Entity*>(transform->GetData()->identifier, entity));
+				_mayaEntites.insert(pair<string, Entity*>(_dataHandler->GetIdentifier(), entity));
 			}
 			if (header.subType == WHOLE)
 			{
-				Entity* entity = _entityHandler->GetEntity(transform->GetData()->identifier);
-				_entityHandler->GetTransform()->SetPosition(*entity, transform->GetData()->position);
-				_entityHandler->GetTransform()->SetScale(*entity, transform->GetData()->scale);
-				_entityHandler->GetTransform()->SetRotation(*entity, transform->GetData()->rotation);
+				Entity* entity = _entityHandler->GetEntity(_dataHandler->GetIdentifier());
+				_entityHandler->GetTransform()->SetPosition(*entity, transform->GetData()->transform.position);
+				_entityHandler->GetTransform()->SetScale(*entity, transform->GetData()->transform.scale);
+				_entityHandler->GetTransform()->SetRotation(*entity, transform->GetData()->transform.rotation);
 			}
 			else if (header.subType == DESTROY)
 			{
@@ -116,10 +119,10 @@ void Viewer::Update()
 			break;
 		case MESH:
 		{
-			MMesh* mesh = _dataHandler->GetMeshes()->at(header.id);
+			MMesh* mesh = _dataHandler->GetMeshe(_dataHandler->GetIdentifier());
 			if (header.subType == CREATE)
 			{
-				Entity* entity = _entityHandler->CreateEntity(mesh->GetData()->identifier, false);
+				Entity* entity = _entityHandler->CreateEntity(_dataHandler->GetIdentifier(), false);
 				_entityHandler->GetMesh()->BindMesh(*entity, *mesh->GetData());
 				_entityHandler->GetShader()->BindShaders(*entity, "PBR", true, false, false, false, true);
 				_entityHandler->GetTransform()->BindTransform(*entity, mesh->GetTransformID());
@@ -127,11 +130,11 @@ void Viewer::Update()
 				for (size_t i = 0; i < mesh->GetMaterialData().size(); i++)
 					_entityHandler->GetMaterial()->BindMaterial(*entity, mesh->GetMaterialData()[i].identifier, mesh->GetMaterialData()[i].type, false);
 
-				_mayaEntites.insert(pair<string, Entity*>(mesh->GetData()->identifier, entity));
+				_mayaEntites.insert(pair<string, Entity*>(_dataHandler->GetIdentifier(), entity));
 			}
 			else if (header.subType == WHOLE)
 			{
-				_entityHandler->GetMesh()->UpdateMesh(*_mayaEntites[mesh->GetData()->identifier], *mesh->GetData());
+				_entityHandler->GetMesh()->UpdateMesh(*_mayaEntites[_dataHandler->GetIdentifier()], *mesh->GetData());
 			}
 			else if (header.subType == DESTROY)
 			{
@@ -142,23 +145,22 @@ void Viewer::Update()
 			break;
 		case LIGHT:
 		{
-			MLight* light = _dataHandler->GetLights()->at(header.id);
-			string identifier = light->GetData()->identifier;
+			MLight* light = _dataHandler->GetLight(_dataHandler->GetIdentifier());
 			if (header.subType == CREATE)
 			{
-				Entity* entity = _entityHandler->CreateEntity(identifier, false);
+				Entity* entity = _entityHandler->CreateEntity(_dataHandler->GetIdentifier(), false);
 				_entityHandler->GetLight()->BindLight(*entity, *light->GetData());
 				_entityHandler->GetTransform()->BindTransform(*entity, light->GetTransformID());
-				_mayaEntites.insert(pair<string, Entity*>(identifier, entity));
+				_mayaEntites.insert(pair<string, Entity*>(_dataHandler->GetIdentifier(), entity));
 			}
 			else if (header.subType == WHOLE)
 			{
-				_entityHandler->GetLight()->SetColor(*_mayaEntites[identifier], light->GetData()->buffer->color);
-				_entityHandler->GetLight()->SetIntensity(*_mayaEntites[identifier], light->GetData()->buffer->intesity.x);
+				_entityHandler->GetLight()->SetColor(*_mayaEntites[_dataHandler->GetIdentifier()], light->GetData()->buffer->color);
+				_entityHandler->GetLight()->SetIntensity(*_mayaEntites[_dataHandler->GetIdentifier()], light->GetData()->buffer->intesity.x);
 			}
 			else if (header.subType == DESTROY)
 			{
-				Entity* entity = _entityHandler->GetEntity(identifier);
+				Entity* entity = _entityHandler->GetEntity(_dataHandler->GetIdentifier());
 				_entityHandler->GetLight()->RemoveLight(*entity);
 			}
 		}

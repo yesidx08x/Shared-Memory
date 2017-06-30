@@ -14,7 +14,13 @@ MMesh::MMesh(void* buffer, unsigned int& tail)
 	ReadWhole(buffer, tail);
 }
 
-MMesh::~MMesh(){}
+MMesh::~MMesh()
+{
+	_data->smallVertexData == nullptr ? 0 : _aligned_free(_data->smallVertexData);
+	_data->vertexData == nullptr ? 0 : _aligned_free(_data->vertexData);
+	_data->position == nullptr ? 0 : _aligned_free(_data->position);
+	_data == nullptr ? 0 :  delete _data->position;
+}
 
 void MMesh::ReadData(void* buffer, unsigned int& tail, PackageType packageType)
 {
@@ -46,12 +52,8 @@ void MMesh::ReadWhole(void* buffer, unsigned int& tail)
 	_transformId = _header.transformID;
 	_materialId = _header.materialID;
 	_data->vertexCount = _header.vertexCount;
-	_data->vertexData = new VertexData[_data->vertexCount];
+	_data->vertexData = (VertexData*)_aligned_malloc(sizeof(VertexData) * _data->vertexCount, 16);
 
-	// Identifier
-	_data->identifier.resize(_header.identifierSize);
-	memcpy((char*)_data->identifier.data(), (char*)buffer + tail, _header.identifierSize);
-	tail += _header.identifierSize;
 	// Transform Identifier
 	_transformIdentifier.resize(_header.transformIDSize);
 	memcpy((char*)_transformIdentifier.data(), (char*)buffer + tail, _header.transformIDSize);
@@ -73,16 +75,4 @@ void MMesh::ReadWhole(void* buffer, unsigned int& tail)
 	// Data
 	memcpy(_data->vertexData, (char*)buffer + tail, sizeof(VertexData) * _data->vertexCount);
 	tail += sizeof(VertexData) * _data->vertexCount;
-}
-
-void MMesh::ReadIndentifier(void * buffer, unsigned int & tail)
-{
-	// Header
-	memcpy(&_header, (char*)buffer + tail, sizeof(MeshHeader));
-	tail += sizeof(MeshHeader);
-
-	// Identifier
-	_data->identifier.resize(_header.identifierSize);
-	memcpy((char*)_data->identifier.data(), (char*)buffer + tail, _header.identifierSize);
-	tail += _header.identifierSize;
 }

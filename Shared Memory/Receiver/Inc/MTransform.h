@@ -13,6 +13,4 @@ public:
 
 private:
 	TransformData* _data;
-	TransformHeader _header;
-	MatrixData _matrixData;
 };

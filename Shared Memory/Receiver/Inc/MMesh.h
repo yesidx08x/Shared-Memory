@@ -21,5 +21,4 @@ private:
 	MeshHeader _header;
 
 	void ReadWhole(void* buffer, unsigned int& tail);
-	void ReadIndentifier(void* buffer, unsigned int& tail);
 };

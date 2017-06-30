@@ -4,10 +4,12 @@ MObject::MObject(){}
 
 MObject::~MObject(){}
 
-ID3D11Buffer** MObject::GetBuffer(){
-	return &_bufferData;}
+ID3D11Buffer** MObject::GetBuffer(){return &_bufferData;}
 
-void MObject::ReleaseBuffer(){SafeRelease(_bufferData);}
+void MObject::ReleaseBuffer()
+{
+	_bufferData != nullptr ? _bufferData->Release() : 0;
+}
 
 void MObject::SetBuffer(ID3D11Buffer* buffer){_bufferData = buffer;}
 

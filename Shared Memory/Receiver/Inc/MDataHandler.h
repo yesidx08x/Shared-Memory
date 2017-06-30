@@ -17,10 +17,10 @@ public:
 	void ShutDown();
 	MessageHeader GetMessageHeader();
 
-	vector<MMesh*>* GetMeshes();
-	vector<MTransform*>* GetTransforms();
-	vector<MLight*>* GetLights();
-	vector<MMaterial*>* GetMaterials();
+	MMesh* GetMeshe(string identifier);
+	MTransform* GetTransform(string identifier);
+	MLight* GetLight(string identifier);
+	MMaterial* GetMaterial(string identifier);
 	string GetIdentifier();
 	MCamera* GetCamera();
 	UINT32* GetMeshStrides();
@@ -37,16 +37,14 @@ private:
 	UINT32 meshOffsets = 0;
 
 	MCamera _camera;
-	vector<MMesh*> _meshes;
-	vector<MLight*> _lights;
-	vector<MMaterial*> _materials;
-	vector<MTransform*> _transforms;
+	map<string, MMesh*> _meshes;
+	map<string, MLight*> _lights;
+	map<string, MMaterial*> _materials;
+	map<string, MTransform*> _transforms;
 	string _identifier;
 	void MeshHandler();
 	void TransformHandler();
 	void LightHandler();
 	void MaterialHandler();
 	void CameraHandler();
-
-	void ReadIdentifier();
 };

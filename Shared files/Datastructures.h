@@ -54,7 +54,7 @@ struct MessageHeader
 	unsigned int type = 0;
 	unsigned int subType = 0;
 	unsigned int size = 0;
-	unsigned int id = 0;
+	unsigned int identifierSize = 0;
 };
 
 struct MeshHeader
@@ -62,24 +62,8 @@ struct MeshHeader
 	unsigned int vertexCount = 0;
 	unsigned int transformID = 0;
 	unsigned int materialID = 0;
-
-
-	unsigned int identifierSize = 0;
 	unsigned int transformIDSize = 0;
 	unsigned int materialIDSize = 0;
-};
-
-struct TransformHeader
-{
-	unsigned int identifierSize = 0;
-};
-
-struct SkinnedMeshHeader
-{
-	unsigned int vertexCount = 0;
-	unsigned int transformID = 0;
-	unsigned int materialID = 0;
-	unsigned int skinClusterID = 0;
 };
 
 struct MaterialHeader
@@ -93,16 +77,9 @@ struct MaterialHeader
 	unsigned int irradienceSize = 0;
 };
 
-struct SkinClusterHeader
-{
-	unsigned int jointAmount = 0;
-	unsigned int jointIndex = 0;
-};
-
 struct LightHeader
 {
 	unsigned int type = 0;
-	unsigned int identifierSize = 0;
 	unsigned int transformIDSize = 0;
 };
 
@@ -157,18 +134,7 @@ struct MaterialData
 
 struct MatrixData
 {
-	XMFLOAT4 position = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	XMFLOAT4 scale = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	XMFLOAT4X4 rotation = XMFLOAT4X4(
-		0.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 0.0f);
-};
-
-struct TransformData
-{
-	TransformData()
+	MatrixData()
 	{
 		position = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 		scale = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -178,17 +144,17 @@ struct TransformData
 		right = XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f);
 		up = XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
 	}
+	XMFLOAT4 position;
+	XMFLOAT4 scale;
+	XMFLOAT4X4 rotation;
+	XMFLOAT4 direction;
+	XMFLOAT4 right;
+	XMFLOAT4 up;
+};
 
-	XMFLOAT4 position; // (0, 0, 0) as standard
-	XMFLOAT4 scale; // (1, 1, 1) as standard
-	XMFLOAT4X4 rotation; // identity matrix as standard
-
-	XMFLOAT4 direction; // (0, 0, 1) as standard
-	XMFLOAT4 right; // (-1, 0, 0) as standard
-	XMFLOAT4 up; // (0, 1, 0) as standard
-
+struct TransformData
+{
 	MatrixData transform;
-
 	string identifier = "";
 	unsigned int nrOfUsers = 0;
 	unsigned int parent = -1;
@@ -196,16 +162,13 @@ struct TransformData
 
 struct CameraBuffers
 {
-	XMFLOAT4X4 view = XMFLOAT4X4(
-		0.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 0.0f);
-	XMFLOAT4X4 projection = XMFLOAT4X4(
-		0.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 0.0f);
+	CameraBuffers()
+	{
+		XMStoreFloat4x4(&view, XMMatrixIdentity());
+		XMStoreFloat4x4(&projection, XMMatrixIdentity());
+	}
+	XMFLOAT4X4 view;
+	XMFLOAT4X4 projection;
 };
 
 struct CameraInfo

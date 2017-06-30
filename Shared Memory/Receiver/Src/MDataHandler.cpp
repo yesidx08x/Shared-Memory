@@ -10,13 +10,77 @@ MDataHandler::~MDataHandler()
 	_sharedMemory.CloseMemory();
 }
 
-vector<MMesh*>* MDataHandler::GetMeshes() { return &_meshes; }
+MMesh* MDataHandler::GetMeshe(string identifier)
+{
+	MMesh* mesh = nullptr;
+	try
+	{
+		mesh = _meshes.at(identifier);
+	}
+	catch (const std::out_of_range& e)
+	{
+#ifdef _DEBUG
+		PrintError("Could not find entity \"" + identifier + " " + e.what() + "\"");
+#endif
+		return nullptr;
+	}
 
-vector<MTransform*>* MDataHandler::GetTransforms() { return &_transforms; }
+	return mesh;
+}
 
-vector<MLight*>* MDataHandler::GetLights() { return &_lights; }
+MTransform* MDataHandler::GetTransform(string identifier)
+{
+	MTransform* transform = nullptr;
+	try
+	{
+		transform = _transforms.at(identifier);
+	}
+	catch (const std::out_of_range& e)
+	{
+#ifdef _DEBUG
+		PrintError("Could not find entity \"" + identifier + " " + e.what() + "\"");
+#endif
+		return nullptr;
+	}
 
-vector<MMaterial*>* MDataHandler::GetMaterials(){return &_materials;}
+	return transform;
+}
+
+MLight* MDataHandler::GetLight(string identifier)
+{
+	MLight* light = nullptr;
+	try
+	{
+		light = _lights.at(identifier);
+	}
+	catch (const std::out_of_range& e)
+	{
+#ifdef _DEBUG
+		PrintError("Could not find entity \"" + identifier + " " + e.what() + "\"");
+#endif
+		return nullptr;
+	}
+
+	return light;
+}
+
+MMaterial* MDataHandler::GetMaterial(string identifier)
+{
+	MMaterial* material = nullptr;
+	try
+	{
+		material = _materials.at(identifier);
+	}
+	catch (const std::out_of_range& e)
+	{
+#ifdef _DEBUG
+		PrintError("Could not find entity \"" + identifier + " " + e.what() + "\"");
+#endif
+		return nullptr;
+	}
+
+	return material;
+}
 
 string MDataHandler::GetIdentifier(){return _identifier;}
 
@@ -38,6 +102,13 @@ DataType MDataHandler::Update()
 
 		if (_messageHeader.size < _circInfo.freeMem)
 		{
+			if (_messageHeader.identifierSize > 0)
+			{
+				_identifier.clear();
+				_identifier.resize(_messageHeader.identifierSize);
+				memcpy((char*)_identifier.data(), (char*)_sharedMemory._buffer + _circInfo.tail, _messageHeader.identifierSize);
+				_circInfo.tail += _messageHeader.identifierSize;
+			}
 			switch (_messageHeader.type)
 			{
 			case CAMERA:
@@ -60,7 +131,7 @@ DataType MDataHandler::Update()
 			}
 		}
 		// Set buffer info
-		_circInfo.freeMem += _messageHeader.size + sizeof(MessageHeader);
+		_circInfo.freeMem += _messageHeader.size + sizeof(MessageHeader) + _messageHeader.identifierSize;
 		_circInfo.ReadCount++;
 		_sharedMemory.SetInfo(_circInfo);
 		return (DataType)_messageHeader.type;
@@ -76,69 +147,72 @@ void MDataHandler::MeshHandler()
 {
 	if (_packageType == DESTROY)
 	{
-		ReadIdentifier();
-		delete _meshes[_messageHeader.id];
-		_meshes[_messageHeader.id] = nullptr;
+		delete _meshes.at(_identifier);
+		_meshes.at(_identifier) = nullptr;
 	}
 	else if (_packageType == CREATE)
-		_meshes.push_back(new MMesh(_sharedMemory._buffer, _circInfo.tail));
+	{
+		MMesh* mesh = new MMesh(_sharedMemory._buffer, _circInfo.tail);
+		_meshes.insert(pair<string, MMesh*>(_identifier, mesh));
+		_meshes[_identifier]->GetData()->identifier = _identifier;
+	}
 	else
-		_meshes[_messageHeader.id]->ReadData(_sharedMemory._buffer, _circInfo.tail, _packageType);
+		_meshes.at(_identifier)->ReadData(_sharedMemory._buffer, _circInfo.tail, _packageType);
 }
 
 void MDataHandler::TransformHandler()
 {
 	if (_packageType == DESTROY)
 	{
-		ReadIdentifier();
-		delete _transforms[_messageHeader.id];
-		_transforms[_messageHeader.id] = nullptr;
+		delete _transforms.at(_identifier);
+		_transforms.at(_identifier) = nullptr;
 	}
 	else if (_packageType == CREATE)
-		_transforms.push_back(new MTransform(_sharedMemory._buffer, _circInfo.tail));
+	{
+		MTransform* transform = new MTransform(_sharedMemory._buffer, _circInfo.tail);
+		_transforms.insert(pair<string, MTransform*>(_identifier, transform));
+		_transforms[_identifier]->GetData()->identifier = _identifier;
+	}
 	else
-		_transforms[_messageHeader.id]->ReadData(_sharedMemory._buffer, _circInfo.tail, _packageType);
+		_transforms.at(_identifier)->ReadData(_sharedMemory._buffer, _circInfo.tail, _packageType);
 }
 
 void MDataHandler::LightHandler()
 {
 	if (_packageType == DESTROY)
 	{
-		ReadIdentifier();
-		delete _lights[_messageHeader.id];
-		_lights[_messageHeader.id] = nullptr;
+		delete _lights.at(_identifier);
+		_lights.at(_identifier) = nullptr;
 	}
 	else if (_packageType == CREATE)
-		_lights.push_back(new MLight(_sharedMemory._buffer, _circInfo.tail));
+	{
+		MLight* light = new MLight(_sharedMemory._buffer, _circInfo.tail);
+		_lights.insert(pair<string, MLight*>(_identifier, light));
+		_lights[_identifier]->GetData()->identifier = _identifier;
+	}
 	else
-		_lights[_messageHeader.id]->ReadData(_sharedMemory._buffer, _circInfo.tail, _packageType);
+		_lights.at(_identifier)->ReadData(_sharedMemory._buffer, _circInfo.tail, _packageType);
 }
 
 void MDataHandler::MaterialHandler()
 {
 	if (_packageType == DESTROY)
 	{
-		ReadIdentifier();
-		delete _materials[_messageHeader.id];
-		_materials[_messageHeader.id] = nullptr;
+		delete _materials.at(_identifier);
+		_materials.at(_identifier) = nullptr;
 	}
 	else if (_packageType == CREATE)
-		_materials.push_back(new MMaterial(_sharedMemory._buffer, _circInfo.tail));
+	{
+		MMaterial* material = new MMaterial(_sharedMemory._buffer, _circInfo.tail);
+		_materials.insert(pair<string, MMaterial*>(_identifier, material));
+	}
 	else
-		_materials[_messageHeader.id]->ReadData(_sharedMemory._buffer, _circInfo.tail, _packageType);
+		_materials.at(_identifier)->ReadData(_sharedMemory._buffer, _circInfo.tail, _packageType);
 }
 
 void MDataHandler::CameraHandler()
 {
 	_camera.ReadData(_sharedMemory._buffer, _circInfo.tail, _packageType);
-}
-
-void MDataHandler::ReadIdentifier()
-{
-	_identifier.clear();
-	_identifier.resize(_messageHeader.size);
-	memcpy((char*)_identifier.data(), (char*)_sharedMemory._buffer + _circInfo.tail, _messageHeader.size);
-	_circInfo.tail += _messageHeader.size;
 }
 
 void MDataHandler::ShutDown()

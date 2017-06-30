@@ -52,14 +52,14 @@ void Light::BindLight(Entity& entity, string name, LightType type)
 
 	if (entity.transformID > -1)
 	{
-		_transform->_transforms[entity.transformID].direction = XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f);
-		XMVECTOR vDirection = XMVector4Normalize(XMLoadFloat4(&_transform->_transforms[entity.transformID].direction));
+		_transform->_transforms[entity.transformID].transform.direction = XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f);
+		XMVECTOR vDirection = XMVector4Normalize(XMLoadFloat4(&_transform->_transforms[entity.transformID].transform.direction));
 		XMMATRIX rotMatrix = XMMatrixInverse(NULL, XMMatrixLookAtLH(XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), vDirection, XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)));
-		XMStoreFloat4x4(&_transform->_transforms[entity.transformID].rotation, rotMatrix);
+		XMStoreFloat4x4(&_transform->_transforms[entity.transformID].transform.rotation, rotMatrix);
 
-		XMStoreFloat4(&_transform->_transforms[entity.transformID].direction, XMVector4Transform(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), rotMatrix));
-		XMStoreFloat4(&_transform->_transforms[entity.transformID].up, XMVector4Transform(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), rotMatrix));
-		XMStoreFloat4(&_transform->_transforms[entity.transformID].right, XMVector4Transform(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), rotMatrix));
+		XMStoreFloat4(&_transform->_transforms[entity.transformID].transform.direction, XMVector4Transform(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), rotMatrix));
+		XMStoreFloat4(&_transform->_transforms[entity.transformID].transform.up, XMVector4Transform(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), rotMatrix));
+		XMStoreFloat4(&_transform->_transforms[entity.transformID].transform.right, XMVector4Transform(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), rotMatrix));
 	}
 }
 
@@ -97,14 +97,14 @@ void Light::BindLight(Entity & entity, LightData data)
 
 	if (entity.transformID > -1)
 	{
-		_transform->_transforms[entity.transformID].direction = XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f);
-		XMVECTOR vDirection = XMVector4Normalize(XMLoadFloat4(&_transform->_transforms[entity.transformID].direction));
+		_transform->_transforms[entity.transformID].transform.direction = XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f);
+		XMVECTOR vDirection = XMVector4Normalize(XMLoadFloat4(&_transform->_transforms[entity.transformID].transform.direction));
 		XMMATRIX rotMatrix = XMMatrixInverse(NULL, XMMatrixLookAtLH(XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), vDirection, XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)));
-		XMStoreFloat4x4(&_transform->_transforms[entity.transformID].rotation, rotMatrix);
+		XMStoreFloat4x4(&_transform->_transforms[entity.transformID].transform.rotation, rotMatrix);
 
-		XMStoreFloat4(&_transform->_transforms[entity.transformID].direction, XMVector4Transform(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), rotMatrix));
-		XMStoreFloat4(&_transform->_transforms[entity.transformID].up, XMVector4Transform(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), rotMatrix));
-		XMStoreFloat4(&_transform->_transforms[entity.transformID].right, XMVector4Transform(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), rotMatrix));
+		XMStoreFloat4(&_transform->_transforms[entity.transformID].transform.direction, XMVector4Transform(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), rotMatrix));
+		XMStoreFloat4(&_transform->_transforms[entity.transformID].transform.up, XMVector4Transform(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), rotMatrix));
+		XMStoreFloat4(&_transform->_transforms[entity.transformID].transform.right, XMVector4Transform(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), rotMatrix));
 	}
 }
 
@@ -142,7 +142,7 @@ void Light::SetIntensity(Entity & entity, float value)
 
 void Light::SetPosition(Entity & entity, XMFLOAT4 & position)
 {
-	_transform->_transforms[entity.transformID].position = position;
+	_transform->_transforms[entity.transformID].transform.position = position;
 	_lightData[entity.lightID].buffer->position = position;
 	_lightData[entity.lightID].update = true;
 }
@@ -150,14 +150,14 @@ void Light::SetPosition(Entity & entity, XMFLOAT4 & position)
 void Light::SetDirection(Entity & entity, XMFLOAT4 & direction)
 {
 	_lightData[entity.lightID].buffer->direction = direction;
-	_transform->_transforms[entity.transformID].direction = direction;
+	_transform->_transforms[entity.transformID].transform.direction = direction;
 	XMVECTOR vDirection = XMLoadFloat4(&direction);
 	XMMATRIX rotMatrix = XMMatrixInverse(NULL, XMMatrixLookAtLH(XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), vDirection, XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)));
-	XMStoreFloat4x4(&_transform->_transforms[entity.transformID].rotation, rotMatrix);
+	XMStoreFloat4x4(&_transform->_transforms[entity.transformID].transform.rotation, rotMatrix);
 
-	XMStoreFloat4(&_transform->_transforms[entity.transformID].direction, XMVector4Transform(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), rotMatrix));
-	XMStoreFloat4(&_transform->_transforms[entity.transformID].up, XMVector4Transform(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), rotMatrix));
-	XMStoreFloat4(&_transform->_transforms[entity.transformID].right, XMVector4Transform(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), rotMatrix));
+	XMStoreFloat4(&_transform->_transforms[entity.transformID].transform.direction, XMVector4Transform(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), rotMatrix));
+	XMStoreFloat4(&_transform->_transforms[entity.transformID].transform.up, XMVector4Transform(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), rotMatrix));
+	XMStoreFloat4(&_transform->_transforms[entity.transformID].transform.right, XMVector4Transform(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), rotMatrix));
 
 	_lightData[entity.lightID].update = true;
 }
