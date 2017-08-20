@@ -6,7 +6,10 @@ Själva programmets uppgift är att kunna dela information mellan Autodesk Maya 
 
 I själva Maya så används ett litet gränssnitt för att kunna styra programmet om det ska skicka data eller inte. ![Image 5](Images/Shared_Memory_5.png?raw=true "Iamge 5")
 
-En uppsättning när man använder detta program skulle kunna se ut på följande vis ![Image 1](Images/Shared_Memory_1.png?raw=true "Iamge 1")
+En uppsättning när man använder detta program skulle kunna se ut på följande vis: ![Image 1](Images/Shared_Memory_1.png?raw=true "Iamge 1")
+
+# Mest relevanta filer
+De filer som har hand om själva delningen från Maya ligger i mapperna "Sender/Inc" och "Sender/SRC". För själva mottagandet av programmet finns de mest relevant filerna i följande mapp "Shared Memory/Reciever". Det finns totalt tre filer som delas mellan programmen och de kan finnas i "Shared files".
 
 # Shared Memory (English)
 Shared memory between Autodesk Maya and custom application. Both programs share a number of files to determine how the structure looks.
