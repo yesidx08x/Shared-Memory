@@ -1,5 +1,5 @@
 # Delat Minne (Svenska)
-Delat minne mellan Autodesk Maya och ett egetbyggt program. De båda programmen delar på ett antal filer för att kunna avgöra hur strukturen ser ut.
+Delat minne mellan Autodesk Maya och ett program som jag byggt själv. De båda programmen delar på ett antal filer för att kunna avgöra hur strukturen ser ut.
 
 # Programmets uppgift
 Själva programmets uppgift är att kunna dela information mellan Autodesk Maya och någon annan form av program i realtid. Huvudsakligen består det av data från meshar i Maya som sparas på ett delat minne som andra program kan ta del av. Eftersom det inte bara är meshar har jag delat upp olika typer av data i grupper. Dessa delar är: camera, light, material, mesh, shader och transform.
@@ -23,4 +23,4 @@ In Maya itself, a small interface is used to control the program if it is to sen
 A screenshot of how the program could be used: ![Image 1](Images/Shared_Memory_1.png?raw=true "Iamge 1")
 
 # Most relevant files
-The files that handle the actual Maya sendings are located in the "Sender/Inc" and "Sender/SRC" folders. For the actual receiving of the program, the most relevant files are in the following folder "Shared Memory/Reciever". There are a total of three files shared between the programs and they can be found under "Shared files".
+The files that handle the actual Maya files for sending  are located in the "Sender/Inc" and "Sender/SRC" folders. For the actual receiving of the program, the most relevant files are in the following folder "Shared Memory/Reciever". There are a total of three files shared between the programs and they can be found under "Shared files".
