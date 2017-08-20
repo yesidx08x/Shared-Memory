@@ -1,3 +1,4 @@
+(For english scroll down)
 # Delat Minne (Svenska)
 Delat minne mellan Autodesk Maya och ett program som jag byggt själv. De båda programmen delar på ett antal filer för att kunna avgöra hur strukturen ser ut.
 
