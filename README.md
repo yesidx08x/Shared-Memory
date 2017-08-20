@@ -18,6 +18,7 @@ Shared memory between Autodesk Maya and custom application. Both programs share 
 The task of the program itself is to be able to share information between Autodesk Maya and any other real-time program. Mainly, it consists of data from Maya meshes that are stored on a shared memory that other programs can use. Since not only meshes that are being sent, I have divided up different types of data into groups. These parts are: camera, light, material, mesh, shader and transform.
 
 In Maya itself, a small interface is used to control the program if it is to send data or not. 
+
 ![Image 5](Images/Shared_Memory_5.png?raw=true "Iamge 5")
 
 A screenshot of how the program could be used: ![Image 1](Images/Shared_Memory_1.png?raw=true "Iamge 1")
