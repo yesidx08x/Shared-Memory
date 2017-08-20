@@ -82,7 +82,7 @@ void Viewer::Update()
 		After this it uses the entityhandler to create an object using the newly retrieved data.
 
 		Please note that this section with shared memory does not fully work because some bugs occurred
-		when cleaning the project.
+		when cleaning the project but the overall structure are the same before cleaning.
 	*/
 
 	if (_dataHandler->SharedOpen() && _engine->GetGuiHandler()->IsSharedOpen())
