@@ -80,9 +80,6 @@ void Viewer::Update()
 		When a message are being sent by the maya application that something have been updated then
 		this program jump to correct case and retrieve the actually data.
 		After this it uses the entityhandler to create an object using the newly retrieved data.
-
-		Please note that this section with shared memory does not fully work because some bugs occurred
-		when cleaning the project but the overall structure are the same before cleaning.
 	*/
 
 	if (_dataHandler->SharedOpen() && _engine->GetGuiHandler()->IsSharedOpen() && _dataHandler->DataToRead())
