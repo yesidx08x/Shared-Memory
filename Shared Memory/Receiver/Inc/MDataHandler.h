@@ -14,6 +14,7 @@ public:
 
 	DataType Update();
 	bool SharedOpen();
+	bool DataToRead();
 	void ShutDown();
 	MessageHeader GetMessageHeader();
 

@@ -79,7 +79,6 @@ void Mesh::BindMesh(Entity & entity, MeshData & data)
 	entity.meshID = (int)_data.size() - 1;
 
 	_data[entity.meshID].vertexCount = data.vertexCount;
-	//_data[entity.meshID].vertexData = new VertexData[_data[entity.meshID].vertexCount];
 	_data[entity.meshID].vertexData = (VertexData*)_aligned_malloc(sizeof(VertexData) * _data[entity.meshID].vertexCount, 16);
 	_data[entity.meshID].vertexSize = sizeof(VertexData);
 	_data[entity.meshID].vertexData = data.vertexData;
@@ -99,7 +98,8 @@ void Mesh::RemoveMesh(Entity & entity)
 		_data[entity.meshID].nrOfUsers--;
 		if (_data[entity.meshID].nrOfUsers <= 0)
 		{
-			delete _data[entity.meshID].vertexData;
+			_data[entity.meshID].smallVertexData == nullptr ? 0 : _aligned_free(_data[entity.meshID].smallVertexData);
+			_data[entity.meshID].vertexData == nullptr ? 0 : _aligned_free(_data[entity.meshID].vertexData);
 			_data[entity.meshID].nrOfUsers = 0;
 			_data[entity.meshID].render = false;
 			_data[entity.meshID].update = false;

@@ -141,6 +141,14 @@ DataType MDataHandler::Update()
 
 bool MDataHandler::SharedOpen(){return _sharedMemory.IsOpen();}
 
+bool MDataHandler::DataToRead()
+{
+	_circInfo = _sharedMemory.GetInfo();
+	if (_circInfo.freeMem < _circInfo.totalMem)
+		return true;
+	return false;
+}
+
 MessageHeader MDataHandler::GetMessageHeader(){return _messageHeader;}
 
 void MDataHandler::MeshHandler()

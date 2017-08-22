@@ -26,9 +26,11 @@ void MLight::ReadData(void* buffer, unsigned int& tail, PackageType packageType)
 	memcpy((char*)_transformIdentifier.data(), (char*)buffer + tail, _header->transformIDSize);
 	tail += _header->transformIDSize;
 	// Data
-	memcpy(&_data->buffer, (char*)buffer + tail, sizeof(LightBuffer));
+	_data->buffer = new LightBuffer();
+	memcpy(_data->buffer, (char*)buffer + tail, sizeof(LightBuffer));
 	tail += sizeof(LightBuffer);
 	_data->type = (LightType)_header->type;
 }
 
-LightData* MLight::GetData() { return _data; }
+LightData* MLight::GetData() {
+	return _data; }

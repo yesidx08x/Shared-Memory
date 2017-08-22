@@ -75,6 +75,7 @@ void Light::BindLight(Entity & entity, LightData data)
 		}
 	}
 	_lightData.push_back(LightData());
+	_lightData.back().buffer = data.buffer;
 	_lightData.back().buffer->active = 1;
 	entity.lightID = (int)_lightData.size() - 1;
 	if (data.type == point)

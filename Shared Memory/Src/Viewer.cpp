@@ -85,7 +85,7 @@ void Viewer::Update()
 		when cleaning the project but the overall structure are the same before cleaning.
 	*/
 
-	if (_dataHandler->SharedOpen() && _engine->GetGuiHandler()->IsSharedOpen())
+	if (_dataHandler->SharedOpen() && _engine->GetGuiHandler()->IsSharedOpen() && _dataHandler->DataToRead())
 	{
 		DataType type = _dataHandler->Update();
 		MessageHeader header = _dataHandler->GetMessageHeader();
